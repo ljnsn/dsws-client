@@ -87,3 +87,11 @@ def snapshot_response() -> Dict[str, Any]:
         ],
         "Tag": "test",
     }
+
+
+@pytest.fixture()
+def invalid_response(timeseries_response: Dict[str, Any]) -> Dict[str, Any]:
+    """Return a response with missing dates."""
+    response = timeseries_response.copy()
+    response["Dates"] = []
+    return response
