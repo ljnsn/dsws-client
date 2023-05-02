@@ -32,6 +32,22 @@ class Meta:
     symbol_names: Dict[str, str] = attrs.field(factory=dict)
     additional_responses: Dict[str, str] = attrs.field(factory=dict)
     tags: List[str] = attrs.field(factory=list)
+    currencies: Dict[str, Dict[str, Optional[str]]] = attrs.field(
+        factory=lambda: collections.defaultdict(dict)
+    )
+
+    def merge(self, other: "Meta") -> "Meta":
+        """Merge this meta object with another one."""
+        return Meta(
+            data_type_names={**self.data_type_names, **other.data_type_names},
+            symbol_names={**self.symbol_names, **other.symbol_names},
+            additional_responses={
+                **self.additional_responses,
+                **other.additional_responses,
+            },
+            tags=[*self.tags, *other.tags],
+            currencies={**self.currencies, **other.currencies},
+        )
 
 
 @attrs.define()
@@ -54,14 +70,7 @@ def responses_to_records(
         _parsed_response = parse(response, process_strings=process_strings)
         parsed_response.records.extend(_parsed_response.records)
         parsed_response.errors.extend(_parsed_response.errors)
-        parsed_response.meta.data_type_names.update(
-            _parsed_response.meta.data_type_names
-        )
-        parsed_response.meta.symbol_names.update(_parsed_response.meta.symbol_names)
-        parsed_response.meta.additional_responses.update(
-            _parsed_response.meta.additional_responses
-        )
-        parsed_response.meta.tags.extend(_parsed_response.meta.tags)
+        parsed_response.meta = parsed_response.meta.merge(_parsed_response.meta)
     return parsed_response
 
 
@@ -77,7 +86,8 @@ def parse(response: DSDataResponse, *, process_strings: bool = True) -> ParsedRe
     for data_type_value in response.data_type_values:
         field = data_type_value.data_type
         for symbol_value in data_type_value.symbol_values:
-            update_record_dict(
+            meta.currencies[symbol_value.symbol][field] = symbol_value.currency
+            process_symbol_value(
                 records,
                 errors,
                 field,
@@ -90,10 +100,10 @@ def parse(response: DSDataResponse, *, process_strings: bool = True) -> ParsedRe
         record["symbol"] = symbol
         record["date"] = date
         record_list.append(record)
-    return ParsedResponse(record_list, errors, meta=meta)
+    return ParsedResponse(record_list, errors, meta)
 
 
-def update_record_dict(
+def process_symbol_value(
     records: RecordDict,
     errors: List[Error],
     field: str,
@@ -126,7 +136,7 @@ def update_record_dict(
         records[(symbol_value.symbol, dates[0])][field] = value
 
 
-def parse_meta(response: DSDataResponse) -> Dict[str, Any]:
+def parse_meta(response: DSDataResponse) -> Meta:
     """Parse meta information from a response."""
     meta = Meta()
     if response.data_type_names:
