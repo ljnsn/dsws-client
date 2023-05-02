@@ -67,14 +67,18 @@ def responses_to_records(
     """Parse a list of DSDataResponse objects into a list of records."""
     parsed_response = ParsedResponse()
     for response in responses:
-        _parsed_response = parse(response, process_strings=process_strings)
+        _parsed_response = parse_response(response, process_strings=process_strings)
         parsed_response.records.extend(_parsed_response.records)
         parsed_response.errors.extend(_parsed_response.errors)
         parsed_response.meta = parsed_response.meta.merge(_parsed_response.meta)
     return parsed_response
 
 
-def parse(response: DSDataResponse, *, process_strings: bool = True) -> ParsedResponse:
+def parse_response(
+    response: DSDataResponse,
+    *,
+    process_strings: bool = True,
+) -> ParsedResponse:
     """Parse a DSDataResponse object into a list of records."""
     if response.dates is None:
         raise InvalidResponseError(
