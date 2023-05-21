@@ -107,7 +107,7 @@ def parse_response(
     return ParsedResponse(record_list, errors, meta)
 
 
-def process_symbol_value(
+def process_symbol_value(  # noqa: PLR0913
     records: RecordDict,
     errors: List[Error],
     field: str,
