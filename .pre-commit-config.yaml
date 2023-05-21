@@ -67,7 +67,7 @@ repos:
         entry: poetry run ruff dsws_client/ tests/
         language: system
         types: [python]
-        args: ["--force-exclude", "--fixable=F401,F841"]
+        args: ["--force-exclude", "--extend-fixable=ERA001,F401,F841"]
       - id: black
         name: black
         entry: black
