@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dsws-client"
-version = "0.2.0"
+version = "0.2.1"
 description = "Python client for the Datastream Web Service API (DSWS)"
 authors = ["ljnsn <info@ljnsn.com>"]
 license = "MIT"
@@ -9,7 +9,7 @@ packages = [{include = "dsws_client"}]
 
 [tool.commitizen]
 name = "cz_gitmoji"
-version = "0.2.0"
+version = "0.2.1"
 version_files = ["pyproject.toml:^version"]
 tag_format = "v$version"
 bump_message = "🔖 bump(release): v$current_version → v$new_version"

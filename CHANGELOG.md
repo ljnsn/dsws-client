@@ -1,3 +1,33 @@
+## v0.2.1 (2024-01-23)
+
+### 🐛🚑️ Fixes
+
+- skip completely empty responses
+
+### build
+
+- **deps**: bump actions/cache from 3 to 4
+- **deps**: bump actions/setup-python from 4 to 5
+- **deps**: bump actions/checkout from 3 to 4
+
+### 🎨🏗️ Style & Architecture
+
+- yaml beautify
+
+### 💚👷 CI & Build
+
+- **pythonpackage**: don't explicitly check cache hit - downloads should still be cached
+- **pre-commit**: set ruff extend-fixable
+- add macos to matrix
+
+### 📌➕⬇️ ➖⬆️  Dependencies
+
+- bump ruff to latest
+
+### 🚨 Linting
+
+- ignore too many args
+
 ## v0.2.0 (2023-05-02)
 
 ### ✨ Features
