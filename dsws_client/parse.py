@@ -67,7 +67,12 @@ def responses_to_records(
     """Parse a list of DSDataResponse objects into a list of records."""
     parsed_response = ParsedResponse()
     for response in responses:
-        _parsed_response = parse_response(response, process_strings=process_strings)
+        try:
+            _parsed_response = parse_response(response, process_strings=process_strings)
+        except InvalidResponseError as exc:
+            logger.warning("Invalid response, skipping")
+            logger.debug(exc)
+            continue
         parsed_response.records.extend(_parsed_response.records)
         parsed_response.errors.extend(_parsed_response.errors)
         parsed_response.meta = parsed_response.meta.merge(_parsed_response.meta)
