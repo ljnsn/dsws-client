@@ -1,3 +1,9 @@
+## v0.2.2 (2024-01-24)
+
+### 🐛🚑️ Fixes
+
+- use python 3.11 in deploy workflow
+
 ## v0.2.1 (2024-01-23)
 
 ### 🐛🚑️ Fixes
