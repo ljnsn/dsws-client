@@ -1,3 +1,21 @@
+## v0.2.3 (2024-01-30)
+
+### 🐛🚑️ Fixes
+
+- python312 support
+
+### 📌➕⬇️ ➖⬆️  Dependencies
+
+- **dev**: add pre-commit dev dependency
+
+### 🔧🔨📦️ Configuration, Scripts, Packages
+
+- update lockfile
+
+### 🧑‍💻 Developer Experience
+
+- add .editorconfig
+
 ## v0.2.2 (2024-01-24)
 
 ### 🐛🚑️ Fixes
