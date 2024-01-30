@@ -132,18 +132,20 @@ class DSDate:
     )
     frequency: Optional[DSDateFrequencyName] = attrs.field(
         converter=attrs.converters.optional(
-            lambda value: value
-            if isinstance(value, DSDateFrequencyName)
-            else DSDateFrequencyName(value)
+            lambda value: (
+                value
+                if isinstance(value, DSDateFrequencyName)
+                else DSDateFrequencyName(value)
+            )
         ),
         validator=attrs.validators.optional(
             attrs.validators.instance_of(DSDateFrequencyName)
         ),
     )
     kind: DSDateKind = attrs.field(
-        converter=lambda value: value
-        if isinstance(value, DSDateKind)
-        else DSDateKind(value),
+        converter=lambda value: (
+            value if isinstance(value, DSDateKind) else DSDateKind(value)
+        ),
         validator=attrs.validators.instance_of(DSDateKind),
     )
 
