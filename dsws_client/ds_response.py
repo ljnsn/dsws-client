@@ -12,7 +12,7 @@ else:
 import msgspec
 
 from dsws_client import converters
-from dsws_client.value_objects import DSStringKVPair, DSSymbolResponseValueType
+from dsws_client.value_objects import DSStringKVPair, DSSymbolResponseValueType, Token
 
 DSDateString = Annotated[
     str,
@@ -46,7 +46,6 @@ class DSDataResponse(msgspec.Struct, rename="pascal"):
     additional_responses: Optional[List[DSStringKVPair]]
     tag: Optional[str]
 
-    @property
     def pydates(self) -> Optional[List[dt.datetime]]:
         """The foo property."""
         if self.dates is None:
@@ -75,14 +74,6 @@ class DSGetTokenResponse(msgspec.Struct, rename="pascal"):
     token_expiry: DSDateString
     properties: Optional[List[DSStringKVPair]]
 
-    @property
-    def expiry_pydate(self) -> dt.datetime:
-        """The foo property."""
-        return converters.convert_date(self.token_expiry)
-
-    @property
-    def is_expired(self) -> bool:
-        """Return True if the token is expired."""
-        return (self.expiry_pydate + dt.timedelta(minutes=1)) < dt.datetime.now(
-            tz=dt.timezone.utc
-        )
+    def to_token(self) -> Token:
+        """Convert to a token."""
+        return Token(self.token_value, converters.convert_date(self.token_expiry))
