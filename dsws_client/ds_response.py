@@ -1,101 +1,75 @@
+"""DSWS responses."""
+
 import datetime as dt
-import functools
-from typing import Any, List, Optional
+from typing import Annotated, Any, List, Optional
 
-import attrs
+import msgspec
 
-from dsws_client import converters, utils
+from dsws_client import converters
 from dsws_client.value_objects import DSStringKVPair, DSSymbolResponseValueType
 
+DSDateString = Annotated[
+    str,
+    msgspec.Meta(pattern=r"\/Date\((\d+)([+-]\d{4})?\)\/"),
+]
 
-@attrs.define(field_transformer=utils.ds_names)
-class DSSymbolResponseValue:
+
+class DSSymbolResponseValue(msgspec.Struct, rename="pascal"):
     """A symbol response value."""
 
     symbol: str
     currency: Optional[str]
-    type: DSSymbolResponseValueType = attrs.field(converter=DSSymbolResponseValueType)
+    type: DSSymbolResponseValueType
     value: Any
 
 
-@attrs.define(field_transformer=utils.ds_names)
-class DSDataTypeResponseValue:
+class DSDataTypeResponseValue(msgspec.Struct, rename="pascal"):
     """A data type response value."""
 
     data_type: str
-    symbol_values: List[DSSymbolResponseValue] = attrs.field(
-        converter=functools.partial(
-            converters.convert_model_list,
-            (DSSymbolResponseValue,),
-        )
-    )
+    symbol_values: List[DSSymbolResponseValue]
 
 
-@attrs.define(field_transformer=utils.ds_names)
-class DSDataResponse:
+class DSDataResponse(msgspec.Struct, rename="pascal"):
     """Object that contains a data response."""
 
-    data_type_values: List[DSDataTypeResponseValue] = attrs.field(
-        converter=functools.partial(
-            converters.convert_model_list,
-            (DSDataTypeResponseValue,),
-        )
-    )
-    dates: Optional[List[dt.datetime]] = attrs.field(
-        converter=attrs.converters.optional(converters.convert_date_list)
-    )
-    data_type_names: Optional[List[DSStringKVPair]] = attrs.field(
-        converter=attrs.converters.optional(converters.convert_key_value_pairs)
-    )
-    symbol_names: Optional[List[DSStringKVPair]] = attrs.field(
-        converter=attrs.converters.optional(converters.convert_key_value_pairs)
-    )
-    additional_responses: Optional[List[DSStringKVPair]] = attrs.field(
-        converter=attrs.converters.optional(converters.convert_key_value_pairs)
-    )
+    data_type_values: List[DSDataTypeResponseValue]
+    dates: Optional[List[DSDateString]]
+    data_type_names: Optional[List[DSStringKVPair]]
+    symbol_names: Optional[List[DSStringKVPair]]
+    additional_responses: Optional[List[DSStringKVPair]]
     tag: Optional[str]
 
 
-@attrs.define(field_transformer=utils.ds_names)
-class DSGetDataResponse:
+class DSGetDataResponse(msgspec.Struct, rename="pascal"):
     """Object that containes a get data response."""
 
-    data_response: DSDataResponse = attrs.field(
-        converter=functools.partial(converters.convert_model, (DSDataResponse,))
-    )
-    properties: Optional[List[DSStringKVPair]] = attrs.field(
-        converter=attrs.converters.optional(converters.convert_key_value_pairs)
-    )
+    data_response: DSDataResponse
+    properties: Optional[List[DSStringKVPair]] = None
 
 
-@attrs.define(field_transformer=utils.ds_names)
-class DSGetDataBundleResponse:
+class DSGetDataBundleResponse(msgspec.Struct, rename="pascal"):
     """Object that contains a get data bundle response."""
 
-    data_responses: List[DSDataResponse] = attrs.field(
-        converter=functools.partial(
-            converters.convert_model_list,
-            (DSDataResponse,),
-        )
-    )
-    properties: Optional[List[DSStringKVPair]] = attrs.field(
-        converter=attrs.converters.optional(converters.convert_key_value_pairs)
-    )
+    data_responses: List[DSDataResponse]
+    properties: Optional[List[DSStringKVPair]] = None
 
 
-@attrs.define(field_transformer=utils.ds_names)
-class DSGetTokenResponse:
+class DSGetTokenResponse(msgspec.Struct, rename="pascal"):
     """Object that contains a token response."""
 
     token_value: str
-    token_expiry: dt.datetime = attrs.field(converter=converters.convert_date)
-    properties: Optional[List[DSStringKVPair]] = attrs.field(
-        converter=attrs.converters.optional(converters.convert_key_value_pairs)
-    )
+    token_expiry: DSDateString
+    properties: Optional[List[DSStringKVPair]]
+
+    @property
+    def expiry_pydate(self) -> dt.datetime:
+        """The foo property."""
+        return converters.convert_date(self.token_expiry)
 
     @property
     def is_expired(self) -> bool:
         """Return True if the token is expired."""
-        return (self.token_expiry + dt.timedelta(minutes=1)) < dt.datetime.now(
+        return (self.expiry_pydate + dt.timedelta(minutes=1)) < dt.datetime.now(
             tz=dt.timezone.utc
         )

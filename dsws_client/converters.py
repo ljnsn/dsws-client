@@ -1,6 +1,6 @@
 import datetime as dt
 import re
-from typing import Any, Dict, List, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 from dsws_client.value_objects import DateType, DSDateName, DSStringKVPair
 
@@ -28,8 +28,10 @@ def convert_date_list(date_list: List[Union[str, dt.datetime]]) -> List[dt.datet
     return [convert_date(date) for date in date_list]
 
 
-def convert_request_date(date: DateType) -> Union[str, DSDateName]:
+def convert_request_date(date: Optional[DateType]) -> Union[str, DSDateName]:
     """Convert a date to a string."""
+    if date is None:
+        return ""
     if isinstance(date, dt.date):
         return date.isoformat()
     try:
@@ -71,7 +73,7 @@ def convert_model_list(
 
 
 def convert_key_value_pairs(
-    items: Union[List[DSStringKVPair], Dict[str, str]]
+    items: Union[List[DSStringKVPair], Dict[str, str]],
 ) -> DSStringKVPair:
     """Convert a dictionary to a list of key-value pairs."""
     if isinstance(items, list):

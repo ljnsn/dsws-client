@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional, Union
 
+import msgspec
 import pytest
 from dsws_client.ds_response import DSDataResponse, DSSymbolResponseValue
 from dsws_client.exceptions import InvalidResponseError
@@ -8,7 +9,7 @@ from dsws_client.parse import parse_response, process_string_value, process_symb
 
 def test_invalid_response(invalid_response: Dict[str, Any]) -> None:
     """Verify parsing an invalid response raises an error."""
-    response = DSDataResponse(**invalid_response)
+    response = msgspec.convert(invalid_response, type=DSDataResponse)
 
     with pytest.raises(InvalidResponseError):
         parse_response(response)
@@ -17,10 +18,10 @@ def test_invalid_response(invalid_response: Dict[str, Any]) -> None:
 def test_process_response_invalid_value() -> None:
     """Verify processing a value raises an exception if invalid."""
     symbol_value = DSSymbolResponseValue(
-        Symbol="AAPL",
-        Currency="E",
-        Type=10,
-        Value=[1, 2, 3],
+        symbol="AAPL",
+        currency="E",
+        type=10,
+        value=[1, 2, 3],
     )
 
     with pytest.raises(InvalidResponseError):
@@ -28,7 +29,8 @@ def test_process_response_invalid_value() -> None:
 
 
 @pytest.mark.parametrize(
-    ("value", "expected"), [("NA", None), ("N", False), ("Y", True), ("TEST", "TEST")]
+    ("value", "expected"),
+    [("NA", None), ("N", False), ("Y", True), ("TEST", "TEST")],
 )
 def test_process_string_value(value: str, expected: Optional[Union[str, bool]]) -> None:
     """Verify strings are cast to correct type."""

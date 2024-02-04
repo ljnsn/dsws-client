@@ -1,17 +1,21 @@
-import enum
-from typing import Any, ClassVar, Dict, List, Optional, Tuple, Union
+"""DSWS requests."""
 
-import attrs
-
-from dsws_client import converters, utils
-from dsws_client.exceptions import InvalidRequestError
-from dsws_client.value_objects import (
-    DSDateFrequencyName,
-    DSDateKind,
-    DSDateName,
-    DSInstrumentPropertyName,
-    DSStringKVPair,
+import datetime as dt
+from typing import (
+    Annotated,
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    Optional,
+    Protocol,
+    Tuple,
+    Union,
 )
+
+import msgspec
+
+from dsws_client.value_objects import DSStringKVPair, enums
 
 # request limits
 MAX_INSTRUMENTS_PER_REQUEST = 50
@@ -23,33 +27,34 @@ MAX_REQUESTS_PER_BUNDLE = 20
 MAX_ITEMS_PER_BUNDLE = 500
 
 
-class DSRequest(attrs.AttrsInstance):
-    """Protocol for DS requests."""
-
-    path: ClassVar[str]
+class DSRequest(Protocol):
+    """A DSWS request."""
 
 
 _HINT_MAP = {
-    "L": DSStringKVPair(DSInstrumentPropertyName.INSTRUMENT_LIST, True),
-    "E": DSStringKVPair(DSInstrumentPropertyName.EXPRESSION, True),
+    "L": DSStringKVPair(enums.DSInstrumentPropertyName.INSTRUMENT_LIST, True),
+    "E": DSStringKVPair(enums.DSInstrumentPropertyName.EXPRESSION, True),
 }
 
-kv_validator = attrs.validators.deep_iterable(
-    attrs.validators.instance_of(DSStringKVPair),
-    attrs.validators.instance_of(list),
-)
+
+class DSGetTokenRequest(msgspec.Struct, rename="pascal"):
+    """Object that defines a token request."""
+
+    path: ClassVar[str] = "GetToken"
+    user_name: str
+    password: str
+    properties: List[DSStringKVPair] = msgspec.field(default_factory=list)
+
+    def add_property(self, key: str, value: str) -> None:
+        """Add a property to the request."""
+        self.properties.append(DSStringKVPair(key, value))
 
 
-@attrs.define()
-class DSInstrument:
-    """An instrument."""
+class DSInstrument(msgspec.Struct, rename="pascal"):
+    """Object that defines an instrument."""
 
-    value: str = attrs.field(validator=attrs.validators.instance_of(str))
-    properties: List[DSStringKVPair] = attrs.field(
-        factory=list,
-        converter=converters.convert_key_value_pairs,
-        validator=kv_validator,
-    )
+    value: str
+    properties: List[DSStringKVPair] = msgspec.field(default_factory=list)
 
     @property
     def identifiers(self) -> List[str]:
@@ -60,7 +65,7 @@ class DSInstrument:
     @classmethod
     def from_list(cls, instrument_list: List[str]) -> "DSInstrument":
         """Return an instrument from a list of instrument names."""
-        properties = [DSStringKVPair(DSInstrumentPropertyName.SYMBOL_SET, True)]
+        properties = [DSStringKVPair(enums.DSInstrumentPropertyName.SYMBOL_SET, True)]
         return cls(",".join(instrument_list), properties)
 
     @classmethod
@@ -82,7 +87,7 @@ class DSInstrument:
             instance = cls(value, hint_properties)
         if return_names:
             instance.properties.append(
-                DSStringKVPair(DSInstrumentPropertyName.RETURN_NAME, True)
+                DSStringKVPair(enums.DSInstrumentPropertyName.RETURN_NAME, True)
             )
         properties = properties or {}
         for key, value in properties.items():
@@ -90,27 +95,22 @@ class DSInstrument:
         return instance
 
 
-@attrs.define()
-class DSDataType:
+class DSDataType(msgspec.Struct, rename="pascal"):
     """A data type (field)."""
 
     value: str
-    properties: List[DSStringKVPair] = attrs.field(
-        factory=list,
-        converter=converters.convert_key_value_pairs,
-        validator=kv_validator,
-    )
+    properties: List[DSStringKVPair] = msgspec.field(default_factory=list)
 
     @classmethod
     def construct(
         cls,
         field: str,
-        return_names: bool = False,
+        return_name: bool = False,
         properties: Optional[Dict[str, str]] = None,
     ) -> "DSDataType":
         """Construct a data type."""
         instance = cls(field)
-        if return_names:
+        if return_name:
             instance.properties.append(DSStringKVPair("ReturnName", True))
         properties = properties or {}
         for key, value in properties.items():
@@ -118,181 +118,115 @@ class DSDataType:
         return instance
 
 
-@attrs.define()
-class DSDate:
+class DSDate(msgspec.Struct, rename="pascal"):
     """Date information."""
 
-    start: Union[str, DSDateName] = attrs.field(
-        converter=converters.convert_request_date,
-        validator=attrs.validators.instance_of((str, DSDateName)),
-    )
-    end: Union[str, DSDateName] = attrs.field(
-        converter=converters.convert_request_date,
-        validator=attrs.validators.instance_of((str, DSDateName)),
-    )
-    frequency: Optional[DSDateFrequencyName] = attrs.field(
-        converter=attrs.converters.optional(
-            lambda value: (
-                value
-                if isinstance(value, DSDateFrequencyName)
-                else DSDateFrequencyName(value)
-            )
-        ),
-        validator=attrs.validators.optional(
-            attrs.validators.instance_of(DSDateFrequencyName)
-        ),
-    )
-    kind: DSDateKind = attrs.field(
-        converter=lambda value: (
-            value if isinstance(value, DSDateKind) else DSDateKind(value)
-        ),
-        validator=attrs.validators.instance_of(DSDateKind),
-    )
+    start: str
+    end: str
+    frequency: Optional[enums.DSDateFrequencyName]
+    kind: enums.DSDateKind
+
+    @classmethod
+    def construct(
+        cls,
+        start: Optional[Union[dt.date, enums.DSDateName]],
+        end: Optional[Union[dt.date, enums.DSDateName]],
+        frequency: Optional[enums.DSDateFrequencyName],
+        kind: enums.DSDateKind,
+    ) -> "DSDate":
+        """Construct a date."""
+        return cls(
+            cls._convert_date(start),
+            cls._convert_date(end),
+            frequency,
+            kind,
+        )
+
+    @classmethod
+    def _convert_date(cls, date: Optional[Union[dt.date, enums.DSDateName]]) -> str:
+        """Convert a date to a string."""
+        if date is None:
+            return ""
+        if isinstance(date, dt.date):
+            return date.isoformat()
+        return date.value
 
 
-@attrs.define()
-class DSDataRequest:
+class DSDataRequest(msgspec.Struct, rename="pascal"):
     """Object that defines a data request."""
 
-    instrument: DSInstrument = attrs.field(
-        validator=attrs.validators.instance_of(DSInstrument)
-    )
-    data_types: List[DSDataType] = attrs.field(
-        validator=attrs.validators.deep_iterable(
-            attrs.validators.instance_of(DSDataType),
-            attrs.validators.and_(
-                attrs.validators.instance_of(list),
-                attrs.validators.min_len(1),
-            ),
-        )
-    )
-    date: DSDate = attrs.field(validator=attrs.validators.instance_of(DSDate))
-    tag: Optional[str] = attrs.field(
-        default=None,
-        validator=attrs.validators.optional(attrs.validators.instance_of(str)),
-    )
+    instrument: DSInstrument
+    data_types: Annotated[List[DSDataType], msgspec.Meta(min_length=1)]
+    date: DSDate
+    tag: Optional[str] = None
 
-    def __attrs_post_init__(self) -> None:
+    def __post_init__(self) -> None:
         """Validate that a request complies with DSWS request limits."""
         if len(self.instrument.identifiers) > MAX_INSTRUMENTS_PER_REQUEST:
             msg = (
                 f"Request contains more than {MAX_INSTRUMENTS_PER_REQUEST} instruments."
             )
-            raise InvalidRequestError(msg)
+            raise ValueError(msg)
         if len(self.data_types) > MAX_DATATYPES_PER_REQUEST:
             msg = f"Request contains more than {MAX_DATATYPES_PER_REQUEST} data types."
-            raise InvalidRequestError(msg)
+            raise ValueError(msg)
         if (
             len(self.instrument.identifiers) * len(self.data_types)
             > MAX_ITEMS_PER_REQUEST
         ):
             msg = f"Request contains more than {MAX_ITEMS_PER_REQUEST} items."
-            raise InvalidRequestError(msg)
+            raise ValueError(msg)
 
 
-@attrs.define()
-class DSGetDataRequest:
+class DSGetDataRequest(msgspec.Struct, rename="pascal"):
     """Object that contains a data request."""
 
     path: ClassVar[str] = "GetData"
-    token_value: str = attrs.field(validator=attrs.validators.instance_of(str))
-    data_request: DSDataRequest = attrs.field(
-        validator=attrs.validators.instance_of(DSDataRequest)
-    )
-    properties: List[DSStringKVPair] = attrs.field(
-        factory=list,
-        converter=converters.convert_key_value_pairs,
-        validator=kv_validator,
-    )
+    token_value: str
+    data_request: DSDataRequest
+    properties: List[DSStringKVPair] = msgspec.field(default_factory=list)
 
-    def add_property(self, key: str, value: Any) -> None:
+    def add_property(self, key: str, value: str) -> None:
         """Add a property to the request."""
         self.properties.append(DSStringKVPair(key, value))
 
 
-@attrs.define()
-class DSGetDataBundleRequest:
+class DSGetDataBundleRequest(msgspec.Struct, rename="pascal"):
     """Object that contains multiple data requests."""
 
     path: ClassVar[str] = "GetDataBundle"
-    token_value: str = attrs.field(validator=attrs.validators.instance_of(str))
-    data_requests: List[DSDataRequest] = attrs.field(
-        validator=attrs.validators.deep_iterable(
-            attrs.validators.instance_of(DSDataRequest),
-            attrs.validators.and_(
-                attrs.validators.instance_of(list),
-                attrs.validators.min_len(1),
-            ),
-        )
-    )
-    properties: List[DSStringKVPair] = attrs.field(
-        factory=list,
-        converter=converters.convert_key_value_pairs,
-        validator=kv_validator,
-    )
+    token_value: str
+    data_requests: Annotated[List[DSDataRequest], msgspec.Meta(min_length=1)]
+    properties: List[DSStringKVPair] = msgspec.field(default_factory=list)
 
-    @data_requests.validator
-    def validate_requests(
-        self,
-        attribute: attrs.Attribute,  # noqa: ARG002
-        value: List[DSDataRequest],
-    ) -> None:
+    def __post_init__(self) -> None:
         """Validate that a bundle complies with DSWS bundle limits."""
-        if len(value) > MAX_REQUESTS_PER_BUNDLE:
+        if len(self.data_requests) > MAX_REQUESTS_PER_BUNDLE:
             msg = f"Bundle contains more than {MAX_REQUESTS_PER_BUNDLE} requests."
-            raise InvalidRequestError(msg)
+            raise ValueError(msg)
         total_items = sum(
             len(request.instrument.identifiers) * len(request.data_types)
-            for request in value
+            for request in self.data_requests
         )
         if total_items > MAX_ITEMS_PER_BUNDLE:
             msg = f"Bundle contains more than {MAX_ITEMS_PER_BUNDLE} items."
-            raise InvalidRequestError(msg)
+            raise ValueError(msg)
 
-    def add_property(self, key: str, value: Any) -> None:
+    def add_property(self, key: str, value: str) -> None:
         """Add a property to the request."""
         self.properties.append(DSStringKVPair(key, value))
 
 
-@attrs.define()
-class DSGetTokenRequest:
-    """Object that defines a token request."""
+def evolve(instance: msgspec.Struct, **changes: object) -> msgspec.Struct:
+    """Evolve an instance."""
 
-    path: ClassVar[str] = "GetToken"
-    user_name: str = attrs.field(validator=attrs.validators.instance_of(str))
-    password: str = attrs.field(validator=attrs.validators.instance_of(str))
-    properties: List[DSStringKVPair] = attrs.field(
-        factory=list,
-        converter=converters.convert_key_value_pairs,
-        validator=kv_validator,
+    def get_field(name: str) -> Any:
+        """Return the field."""
+        return changes.get(name, getattr(instance, name))
+
+    return instance.__class__(
+        **{field: get_field(field) for field in instance.__struct_fields__}
     )
-
-    def add_property(self, key: str, value: Any) -> None:
-        """Add a property to the request."""
-        self.properties.append(DSStringKVPair(key, value))
-
-
-def to_ds_dict(obj: attrs.AttrsInstance) -> Dict[str, Any]:
-    """Convert an attrs class to a dictionary."""
-    obj_dict: Dict[str, Any] = {}
-    for field in attrs.fields(type(obj)):
-        value = getattr(obj, field.name)
-        if attrs.has(type(value)):
-            obj_dict[utils.snake_to_pascal_case(field.name)] = to_ds_dict(value)
-        elif isinstance(value, list):
-            if value:
-                value_list = [
-                    to_ds_dict(item) if attrs.has(type(item)) else item
-                    for item in value
-                ]
-            else:
-                value_list = None
-            obj_dict[utils.snake_to_pascal_case(field.name)] = value_list
-        else:
-            if isinstance(value, enum.Enum):
-                value = value.value
-            obj_dict[utils.snake_to_pascal_case(field.name)] = value
-    return obj_dict
 
 
 def bundle_identifiers(
@@ -321,7 +255,7 @@ def bundle_identifiers(
         batch_identifiers = identifiers[batch_idx : batch_idx + n_identifiers_per_batch]
         bundles.append(
             split_bundle_identifiers(
-                attrs.evolve(instrument, value=",".join(batch_identifiers)),
+                evolve(instrument, value=",".join(batch_identifiers)),
                 n_fields,
             )
         )
@@ -353,6 +287,11 @@ def split_bundle_identifiers(
             request_idx : request_idx + n_identifiers_per_request
         ]
         request_bundles.append(
-            attrs.evolve(bundle_instrument, value=",".join(bundle_request_identifiers))
+            evolve(bundle_instrument, value=",".join(bundle_request_identifiers))
         )
     return tuple(request_bundles)
+
+
+def to_ds_dict() -> Dict[str, Any]:
+    """Return a dictionary representation of a DSWS request."""
+    raise NotImplementedError("Method not implemented.")
