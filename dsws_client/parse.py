@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import attrs
+import msgspec
 
 from dsws_client import converters
 from dsws_client.ds_response import DSDataResponse, DSSymbolResponseValue
@@ -15,8 +15,7 @@ logger = logging.getLogger(__name__)
 RecordDict = Dict[Tuple[str, dt.datetime], Dict[str, Any]]
 
 
-@attrs.define()
-class Error:
+class Error(msgspec.Struct):
     """Error object."""
 
     field: str
@@ -24,16 +23,15 @@ class Error:
     message: str
 
 
-@attrs.define()
-class Meta:
+class Meta(msgspec.Struct):
     """Meta object."""
 
-    data_type_names: Dict[str, str] = attrs.field(factory=dict)
-    symbol_names: Dict[str, str] = attrs.field(factory=dict)
-    additional_responses: Dict[str, str] = attrs.field(factory=dict)
-    tags: List[str] = attrs.field(factory=list)
-    currencies: Dict[str, Dict[str, Optional[str]]] = attrs.field(
-        factory=lambda: collections.defaultdict(dict)
+    data_type_names: Dict[str, str] = msgspec.field(default_factory=dict)
+    symbol_names: Dict[str, str] = msgspec.field(default_factory=dict)
+    additional_responses: Dict[str, str] = msgspec.field(default_factory=dict)
+    tags: List[str] = msgspec.field(default_factory=list)
+    currencies: Dict[str, Dict[str, Optional[str]]] = msgspec.field(
+        default_factory=lambda: collections.defaultdict(dict)
     )
 
     def merge(self, other: "Meta") -> "Meta":
@@ -50,13 +48,12 @@ class Meta:
         )
 
 
-@attrs.define()
-class ParsedResponse:
+class ParsedResponse(msgspec.Struct):
     """Parsed response object."""
 
-    records: List[Dict[str, Any]] = attrs.field(factory=list)
-    errors: List[Error] = attrs.field(factory=list)
-    meta: Meta = attrs.field(factory=Meta)
+    records: List[Dict[str, Any]] = msgspec.field(default_factory=list)
+    errors: List[Error] = msgspec.field(default_factory=list)
+    meta: Meta = msgspec.field(default_factory=Meta)
 
 
 def responses_to_records(
@@ -85,7 +82,8 @@ def parse_response(
     process_strings: bool = True,
 ) -> ParsedResponse:
     """Parse a DSDataResponse object into a list of records."""
-    if response.pydates is None:
+    dates = response.pydates()
+    if dates is None:
         raise InvalidResponseError(
             "Response does not contain dates. Probably the request was invalid."
         )
@@ -100,7 +98,7 @@ def parse_response(
                 records,
                 errors,
                 field,
-                response.pydates,
+                dates,
                 symbol_value,
                 process_strings=process_strings,
             )
