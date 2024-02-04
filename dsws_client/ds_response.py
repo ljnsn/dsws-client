@@ -40,6 +40,13 @@ class DSDataResponse(msgspec.Struct, rename="pascal"):
     additional_responses: Optional[List[DSStringKVPair]]
     tag: Optional[str]
 
+    @property
+    def pydates(self) -> Optional[List[dt.datetime]]:
+        """The foo property."""
+        if self.dates is None:
+            return None
+        return [converters.convert_date(date_str) for date_str in self.dates]
+
 
 class DSGetDataResponse(msgspec.Struct, rename="pascal"):
     """Object that containes a get data response."""

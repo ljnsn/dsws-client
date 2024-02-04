@@ -10,6 +10,7 @@ from typing import (
     Optional,
     Protocol,
     Tuple,
+    TypeVar,
     Union,
 )
 
@@ -29,6 +30,9 @@ MAX_ITEMS_PER_BUNDLE = 500
 
 class DSRequest(Protocol):
     """A DSWS request."""
+
+    path: ClassVar[str]
+    properties: List[DSStringKVPair]
 
 
 _HINT_MAP = {
@@ -129,26 +133,31 @@ class DSDate(msgspec.Struct, rename="pascal"):
     @classmethod
     def construct(
         cls,
-        start: Optional[Union[dt.date, enums.DSDateName]],
-        end: Optional[Union[dt.date, enums.DSDateName]],
-        frequency: Optional[enums.DSDateFrequencyName],
-        kind: enums.DSDateKind,
+        start: Optional[Union[str, dt.date, enums.DSDateName]],
+        end: Optional[Union[str, dt.date, enums.DSDateName]],
+        frequency: Optional[str],
+        kind: int,
     ) -> "DSDate":
         """Construct a date."""
         return cls(
             cls._convert_date(start),
             cls._convert_date(end),
-            frequency,
-            kind,
+            None if frequency is None else enums.DSDateFrequencyName(frequency),
+            enums.DSDateKind(kind),
         )
 
     @classmethod
-    def _convert_date(cls, date: Optional[Union[dt.date, enums.DSDateName]]) -> str:
+    def _convert_date(
+        cls,
+        date: Optional[Union[str, dt.date, enums.DSDateName]],
+    ) -> str:
         """Convert a date to a string."""
         if date is None:
             return ""
         if isinstance(date, dt.date):
             return date.isoformat()
+        if isinstance(date, str):
+            date = enums.DSDateName(date)
         return date.value
 
 
@@ -217,7 +226,10 @@ class DSGetDataBundleRequest(msgspec.Struct, rename="pascal"):
         self.properties.append(DSStringKVPair(key, value))
 
 
-def evolve(instance: msgspec.Struct, **changes: object) -> msgspec.Struct:
+T = TypeVar("T", bound=msgspec.Struct)
+
+
+def evolve(instance: T, **changes: object) -> T:
     """Evolve an instance."""
 
     def get_field(name: str) -> Any:

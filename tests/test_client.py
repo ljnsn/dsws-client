@@ -1,3 +1,4 @@
+import datetime as dt
 import os
 
 import pytest
@@ -44,7 +45,7 @@ def test_fetch_snapshot_data(client: DSWSClient, tag: str) -> None:
     """Test fetch_snapshot_data method."""
     identifiers = ["VOD", "U:JPM"]
     fields = ["NAME", "ISIN"]
-    start = "2020-01-01"
+    start = dt.date(2020, 1, 1)
     response = client.fetch_snapshot_data(
         identifiers=identifiers,
         fields=fields,
@@ -58,6 +59,7 @@ def test_fetch_snapshot_data(client: DSWSClient, tag: str) -> None:
     assert len(response.meta.symbol_names) == 2
     assert len(response.meta.additional_responses) == 0
     assert len(response.meta.tags) == 1
+    assert all(isinstance(record["date"], dt.datetime) for record in response.records)
 
 
 @pytest.mark.skipif(not has_credentials(), reason="no credentials available")
@@ -65,8 +67,8 @@ def test_fetch_timeseries_data(client: DSWSClient, tag: str) -> None:
     """Test fetch_timeseries_data method."""
     identifiers = ["VOD", "U:JPM"]
     fields = ["P", "MV"]
-    start = "2020-01-01"
-    end = "2020-01-10"
+    start = dt.date(2020, 1, 1)
+    end = dt.date(2020, 1, 10)
     response = client.fetch_timeseries_data(
         identifiers=identifiers,
         fields=fields,

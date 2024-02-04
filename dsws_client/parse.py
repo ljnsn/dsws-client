@@ -85,13 +85,13 @@ def parse_response(
     process_strings: bool = True,
 ) -> ParsedResponse:
     """Parse a DSDataResponse object into a list of records."""
-    if response.dates is None:
+    if response.pydates is None:
         raise InvalidResponseError(
             "Response does not contain dates. Probably the request was invalid."
         )
     meta = parse_meta(response)
-    records = collections.defaultdict(dict)
-    errors = []
+    records: RecordDict = collections.defaultdict(dict)
+    errors: list[Error] = []
     for data_type_value in response.data_type_values:
         field = data_type_value.data_type
         for symbol_value in data_type_value.symbol_values:
@@ -100,7 +100,7 @@ def parse_response(
                 records,
                 errors,
                 field,
-                response.dates,
+                response.pydates,
                 symbol_value,
                 process_strings=process_strings,
             )
@@ -128,7 +128,7 @@ def process_symbol_value(  # noqa: PLR0913
     func = _CONVERSION_MAP[symbol_value.type]
     value = func(symbol_value.value)
     if symbol_value.type == DSSymbolResponseValueType.STRING and process_strings:
-        value = process_string_value(value)
+        value = process_string_value(value)  # type: ignore[arg-type]
     if is_error:
         for date in dates:
             records[(symbol_value.symbol, date)][field] = value
