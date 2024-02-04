@@ -3,6 +3,7 @@
 __all__ = (
     # objects
     "DSStringKVPair",
+    "Token",
     # enums
     "DSDateFrequencyName",
     "DSDateKind",
@@ -20,4 +21,4 @@ from dsws_client.value_objects.enums import (
     DSInstrumentPropertyName,
     DSSymbolResponseValueType,
 )
-from dsws_client.value_objects.types import DateType, DSStringKVPair
+from dsws_client.value_objects.types import DateType, DSStringKVPair, Token
