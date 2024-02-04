@@ -91,7 +91,7 @@ def parse_response(
         )
     meta = parse_meta(response)
     records: RecordDict = collections.defaultdict(dict)
-    errors: list[Error] = []
+    errors: List[Error] = []
     for data_type_value in response.data_type_values:
         field = data_type_value.data_type
         for symbol_value in data_type_value.symbol_values:

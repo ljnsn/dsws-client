@@ -1,7 +1,13 @@
 """DSWS responses."""
 
 import datetime as dt
-from typing import Annotated, Any, List, Optional
+import sys
+from typing import Any, List, Optional
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 import msgspec
 
