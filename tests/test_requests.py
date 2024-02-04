@@ -1,6 +1,6 @@
 import datetime as dt
 import random
-from typing import List, Optional, Union
+from typing import List, Optional, Type, Union
 
 import pytest
 from dsws_client.ds_request import (
@@ -117,7 +117,7 @@ def test_request_instantiation(date: DSDate) -> None:
 def test_request_validation(
     instrument: DSInstrument,
     data_types: List[DSDataType],
-    expected: type[Exception],
+    expected: Type[Exception],
 ) -> None:
     """Verify that requests are validated properly."""
     with pytest.raises(expected):
