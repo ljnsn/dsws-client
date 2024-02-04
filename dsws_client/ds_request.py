@@ -307,8 +307,3 @@ def split_bundle_identifiers(
             evolve(bundle_instrument, value=",".join(bundle_request_identifiers))
         )
     return tuple(request_bundles)
-
-
-def to_ds_dict() -> Dict[str, Any]:
-    """Return a dictionary representation of a DSWS request."""
-    raise NotImplementedError("Method not implemented.")
