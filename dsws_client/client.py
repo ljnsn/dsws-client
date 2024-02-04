@@ -1,3 +1,5 @@
+"""The DSWS client."""
+
 import logging
 import sys
 import urllib.parse
@@ -75,7 +77,7 @@ class DSWSClient:
         self,
         identifiers: List[str],
         fields: List[str],
-        start: DateType = "",
+        start: Optional[DateType] = None,
         tag: Optional[str] = None,
     ) -> ParsedResponse:
         """Fetch snapshot data."""
@@ -83,7 +85,7 @@ class DSWSClient:
             identifiers=identifiers,
             fields=fields,
             start=start,
-            end="",
+            end=None,
             frequency=None,
             kind=0,
             tag=tag,
@@ -99,8 +101,8 @@ class DSWSClient:
         self,
         identifiers: List[str],
         fields: List[str],
-        start: DateType = "",
-        end: DateType = "",
+        start: Optional[DateType] = None,
+        end: Optional[DateType] = None,
         frequency: str = "D",
         tag: Optional[str] = None,
     ) -> ParsedResponse:
@@ -125,8 +127,8 @@ class DSWSClient:
         self,
         identifiers: Union[str, List[str]],
         fields: List[str],
-        start: DateType,
-        end: DateType = "",
+        start: Optional[DateType],
+        end: Optional[DateType] = None,
         frequency: str = "D",
         kind: int = 1,
         tag: Optional[str] = None,
@@ -156,8 +158,8 @@ class DSWSClient:
         self,
         identifiers: List[str],
         fields: List[str],
-        start: DateType,
-        end: DateType = "",
+        start: Optional[DateType],
+        end: Optional[DateType] = None,
         frequency: Optional[str] = "D",
         kind: int = 1,
         tag: Optional[str] = None,
@@ -181,7 +183,7 @@ class DSWSClient:
             )
             for field in fields
         ]
-        date = DSDate(start, end, frequency, kind)
+        date = DSDate.construct(start, end, frequency, kind)
         identifier_bundles = bundle_identifiers(instrument, len(data_types))
         responses = []
         for identifier_bundle in identifier_bundles:
@@ -270,8 +272,8 @@ class DSWSClient:
         self,
         identifiers: Union[str, List[str]],
         fields: List[str],
-        start: DateType,
-        end: DateType,
+        start: Optional[DateType],
+        end: Optional[DateType],
         frequency: Optional[str],
         kind: int,
         tag: Optional[str] = None,

@@ -5,6 +5,7 @@ import pytest
 from dsws_client.ds_response import DSDataResponse, DSSymbolResponseValue
 from dsws_client.exceptions import InvalidResponseError
 from dsws_client.parse import parse_response, process_string_value, process_symbol_value
+from dsws_client.value_objects import DSSymbolResponseValueType
 
 
 def test_invalid_response(invalid_response: Dict[str, Any]) -> None:
@@ -20,7 +21,7 @@ def test_process_response_invalid_value() -> None:
     symbol_value = DSSymbolResponseValue(
         symbol="AAPL",
         currency="E",
-        type=10,
+        type=DSSymbolResponseValueType.DOUBLE_ARRAY,
         value=[1, 2, 3],
     )
 
