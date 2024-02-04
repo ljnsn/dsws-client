@@ -1,9 +1,9 @@
-import json
 import logging
 import sys
 import urllib.parse
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
+import msgspec
 import requests
 
 from dsws_client.config import DSWSConfig
@@ -17,7 +17,6 @@ from dsws_client.ds_request import (
     DSInstrument,
     DSRequest,
     bundle_identifiers,
-    to_ds_dict,
 )
 from dsws_client.ds_response import (
     DSGetDataBundleResponse,
@@ -177,7 +176,7 @@ class DSWSClient:
         data_types = [
             DSDataType.construct(
                 field,
-                return_names=return_field_names,
+                return_name=return_field_names,
                 properties=field_props,
             )
             for field in fields
@@ -194,7 +193,7 @@ class DSWSClient:
             responses.append(self.get_data_bundle(data_requests))
         return responses
 
-    def get_token(self, **kwargs: Any) -> DSGetTokenResponse:
+    def get_token(self, **kwargs: object) -> DSGetTokenResponse:
         """
         Fetch a new token.
 
@@ -205,11 +204,21 @@ class DSWSClient:
             A token response.
         """
         return self._execute_request(
-            DSGetTokenRequest(self._username, self._password, properties=kwargs),
+            DSGetTokenRequest(
+                self._username,
+                self._password,
+                properties=[
+                    DSStringKVPair(key, value) for key, value in kwargs.items()
+                ],
+            ),
             DSGetTokenResponse,
         )
 
-    def get_data(self, data_request: DSDataRequest, **kwargs: Any) -> DSGetDataResponse:
+    def get_data(
+        self,
+        data_request: DSDataRequest,
+        **kwargs: object,
+    ) -> DSGetDataResponse:
         """
         Post a data request.
 
@@ -224,7 +233,9 @@ class DSWSClient:
             DSGetDataRequest(
                 token_value=self.token,
                 data_request=data_request,
-                properties=kwargs,
+                properties=[
+                    DSStringKVPair(key, value) for key, value in kwargs.items()
+                ],
             ),
             DSGetDataResponse,
         )
@@ -232,7 +243,7 @@ class DSWSClient:
     def get_data_bundle(
         self,
         data_requests: List[DSDataRequest],
-        **kwargs: Any,
+        **kwargs: object,
     ) -> DSGetDataBundleResponse:
         """
         Post multiple data requests.
@@ -248,7 +259,9 @@ class DSWSClient:
             DSGetDataBundleRequest(
                 token_value=self.token,
                 data_requests=data_requests,
-                properties=kwargs,
+                properties=[
+                    DSStringKVPair(key, value) for key, value in kwargs.items()
+                ],
             ),
             DSGetDataBundleResponse,
         )
@@ -277,12 +290,12 @@ class DSWSClient:
         data_types = [
             DSDataType.construct(
                 field,
-                return_names=return_field_names,
+                return_name=return_field_names,
                 properties=field_props,
             )
             for field in fields
         ]
-        date = DSDate(start, end, frequency, kind)
+        date = DSDate.construct(start, end, frequency, kind)
         return DSDataRequest(instrument, data_types, date, tag)
 
     def _execute_request(
@@ -296,24 +309,25 @@ class DSWSClient:
         if self._data_source is not None:
             request.properties.append(DSStringKVPair("Source", self._data_source))
         request_url = urllib.parse.urljoin(self._url, request.path)
-        request_dict = to_ds_dict(request)
+        request_data = msgspec.json.encode(request)
         if self._debug:
-            sys.stdout.write(f"sending request: {request_dict!s}")
+            sys.stdout.write(f"sending request: {request_data!s}")
         response = self._session.post(
             request_url,
-            json=request_dict,
+            data=request_data,
             proxies=self._proxies,
             verify=self._ssl_cert,
             timeout=self._timeout,
+            headers={"Content-Type": "application/json"},
         )
         if not response.ok:
             msg = f"request failed: {response.text}"
             raise RequestFailedError(msg, response.status_code)
         try:
-            json_response = response.json()
-        except json.JSONDecodeError as exc:
+            response_decoded = msgspec.json.decode(response.content, type=response_cls)
+        except (msgspec.ValidationError, ValueError, TypeError) as exc:
             msg = f"invalid response: {response.text}"
             raise InvalidResponseError(msg) from exc
         if self._debug:
-            sys.stdout.write(f"received response: {json_response!s}")
-        return response_cls(**json_response)
+            sys.stdout.write(f"received response: {response_decoded!s}")
+        return response_decoded

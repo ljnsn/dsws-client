@@ -1,16 +1,13 @@
 import datetime as dt
-from typing import Union
+from typing import Optional, Union
 
-import attrs
-
-from dsws_client import utils
+import msgspec
 
 DateType = Union[dt.date, str]
 
 
-@attrs.define(field_transformer=utils.ds_names, frozen=True)
-class DSStringKVPair:
+class DSStringKVPair(msgspec.Struct, rename="pascal", frozen=True):
     """A key-value pair."""
 
     key: str
-    value: str
+    value: Optional[str]

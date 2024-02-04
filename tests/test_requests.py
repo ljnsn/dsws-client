@@ -12,7 +12,6 @@ from dsws_client.ds_request import (
     DSGetDataBundleRequest,
     DSInstrument,
 )
-from dsws_client.exceptions import InvalidRequestError
 from dsws_client.value_objects import (
     DSDateName,
     DSInstrumentPropertyName,
@@ -98,17 +97,17 @@ def test_request_instantiation(date: DSDate) -> None:
         (
             DSInstrument(",".join(["DUMMY"] * (MAX_INSTRUMENTS_PER_REQUEST + 1))),
             [DSDataType("P")],
-            InvalidRequestError,
+            ValueError,
         ),
         (
             DSInstrument("DUMMY"),
             [DSDataType("P")] * (MAX_DATATYPES_PER_REQUEST + 1),
-            InvalidRequestError,
+            ValueError,
         ),
         (
             DSInstrument(",".join(["DUMMY"] * 40)),
             [DSDataType("P")] * 3,
-            InvalidRequestError,
+            ValueError,
         ),
     ],
 )
@@ -132,7 +131,7 @@ def test_bundle_validation(token: str) -> None:
         make_data_request(random_date()) for _ in range(MAX_ITEMS_PER_BUNDLE + 1)
     ]
 
-    with pytest.raises(InvalidRequestError):
+    with pytest.raises(ValueError):  # noqa: PT011
         DSGetDataBundleRequest(data_requests=requests, token_value=token)
 
 
