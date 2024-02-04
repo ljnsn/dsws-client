@@ -30,7 +30,7 @@ from dsws_client.exceptions import (
     RequestFailedError,
 )
 from dsws_client.parse import ParsedResponse, responses_to_records
-from dsws_client.value_objects import DateType, DSStringKVPair
+from dsws_client.value_objects import DateType, DSStringKVPair, Token
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ class DSWSClient:
         )
         self._timeout = config.timeout
         self._ssl_cert = config.ssl_cert
-        self._token_response: Optional[DSGetTokenResponse] = None
+        self._token: Optional[Token] = None
         self._app_id = config.app_id
         self._data_source = config.data_source
         self._debug = config.debug
@@ -69,9 +69,9 @@ class DSWSClient:
     @property
     def token(self) -> str:
         """Get a token."""
-        if self._token_response is None or self._token_response.is_expired:
-            self._token_response = self.get_token()
-        return self._token_response.token_value
+        if self._token is None or self._token.is_expired:
+            self._token = self.get_token()
+        return self._token.token_value
 
     def fetch_snapshot_data(
         self,
@@ -195,7 +195,7 @@ class DSWSClient:
             responses.append(self.get_data_bundle(data_requests))
         return responses
 
-    def get_token(self, **kwargs: object) -> DSGetTokenResponse:
+    def get_token(self, **kwargs: object) -> Token:
         """
         Fetch a new token.
 
@@ -203,9 +203,9 @@ class DSWSClient:
             **kwargs: Additional properties to set on the request.
 
         Returns:
-            A token response.
+            A token.
         """
-        return self._execute_request(
+        token_response = self._execute_request(
             DSGetTokenRequest(
                 self._username,
                 self._password,
@@ -215,6 +215,7 @@ class DSWSClient:
             ),
             DSGetTokenResponse,
         )
+        return token_response.to_token()
 
     def get_data(
         self,
