@@ -5,10 +5,13 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import msgspec
 
-from dsws_client import converters
-from dsws_client.ds_response import DSDataResponse, DSSymbolResponseValue
+from dsws_client.ds_response import (
+    DSDataResponse,
+    DSError,
+    DSString,
+    DSSymbolResponseValue,
+)
 from dsws_client.exceptions import InvalidResponseError
-from dsws_client.value_objects import DSSymbolResponseValueType
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +46,7 @@ class Meta(msgspec.Struct):
                 **self.additional_responses,
                 **other.additional_responses,
             },
-            tags=[*self.tags, *other.tags],
+            tags=list({*self.tags, *other.tags}),
             currencies={**self.currencies, **other.currencies},
         )
 
@@ -120,12 +123,11 @@ def process_symbol_value(  # noqa: PLR0913
     process_strings: bool,
 ) -> None:
     """Parse a symbol value into a dictionary."""
-    is_error = symbol_value.type == DSSymbolResponseValueType.ERROR
+    is_error = isinstance(symbol_value, DSError)
     if is_error:
-        errors.append(Error(field, symbol_value.symbol, symbol_value.value))
-    func = _CONVERSION_MAP[symbol_value.type]
-    value = func(symbol_value.value)
-    if symbol_value.type == DSSymbolResponseValueType.STRING and process_strings:
+        errors.append(Error(field, symbol_value.symbol, symbol_value.value))  # type: ignore[arg-type]
+    value = symbol_value.parse()
+    if isinstance(symbol_value, DSString) and process_strings:
         value = process_string_value(value)  # type: ignore[arg-type]
     if is_error:
         for date in dates:
@@ -170,87 +172,3 @@ def process_string_value(value: str) -> Optional[Union[str, bool]]:
         "N": False,
         "Y": True,
     }.get(value, value)
-
-
-def parse_empty_value(value: Any) -> None:  # noqa: ARG001
-    """Parse an empty value."""
-    return
-
-
-def parse_boolean_value(value: Any) -> bool:
-    """Parse a boolean value."""
-    return {
-        "Y": True,
-        "true": True,
-        "True": True,
-        "N": False,
-        "false": False,
-        "False": False,
-    }[value]
-
-
-def parse_int_value(value: Any) -> int:
-    """Parse an integer value."""
-    return int(value)
-
-
-def parse_date_time_value(value: Any) -> dt.datetime:
-    """Parse a date/time value."""
-    return converters.convert_date(value)
-
-
-def parse_double_value(value: Any) -> float:
-    """Parse a double value."""
-    return float(value)
-
-
-def parse_string_value(value: Any) -> str:
-    """Parse a string value."""
-    return str(value)
-
-
-def parse_bool_array(values: List[Any]) -> List[bool]:
-    """Parse a boolean array."""
-    return [parse_boolean_value(value) for value in values]
-
-
-def prase_int_array(values: List[Any]) -> List[int]:
-    """Parse an integer array."""
-    return [parse_int_value(value) for value in values]
-
-
-def parse_date_time_array(values: List[Any]) -> List[dt.datetime]:
-    """Parse a date/time array."""
-    return [parse_date_time_value(value) for value in values]
-
-
-def parse_double_array(values: List[Any]) -> List[float]:
-    """Parse a double array."""
-    return [parse_double_value(value) for value in values]
-
-
-def parse_string_array(values: List[Any]) -> List[str]:
-    """Parse a string array."""
-    return [parse_string_value(value) for value in values]
-
-
-def parse_object_array(values: List[Any]) -> List[Any]:
-    """Parse an object array."""
-    return values
-
-
-_CONVERSION_MAP = {
-    DSSymbolResponseValueType.ERROR: parse_empty_value,
-    DSSymbolResponseValueType.EMPTY: parse_empty_value,
-    DSSymbolResponseValueType.BOOL: parse_boolean_value,
-    DSSymbolResponseValueType.INT: parse_int_value,
-    DSSymbolResponseValueType.DATE_TIME: parse_date_time_value,
-    DSSymbolResponseValueType.DOUBLE: parse_double_value,
-    DSSymbolResponseValueType.STRING: parse_string_value,
-    DSSymbolResponseValueType.BOOL_ARRAY: parse_bool_array,
-    DSSymbolResponseValueType.INT_ARRAY: prase_int_array,
-    DSSymbolResponseValueType.DATE_TIME_ARRAY: parse_date_time_array,
-    DSSymbolResponseValueType.DOUBLE_ARRAY: parse_double_array,
-    DSSymbolResponseValueType.STRING_ARRAY: parse_string_array,
-    DSSymbolResponseValueType.OBJECT_ARRAY: parse_object_array,
-}
