@@ -34,8 +34,7 @@ includes = ["dsws_client"]
 
 [tool.commitizen]
 name = "cz_gitmoji"
-version = "0.2.3"
-version_files = ["pyproject.toml:^version"]
+version_provider = "pep621"
 tag_format = "v$version"
 bump_message = "🔖 bump(release): v$current_version → v$new_version"
 update_changelog_on_bump = true
