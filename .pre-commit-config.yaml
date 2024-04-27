@@ -69,14 +69,15 @@ repos:
     hooks:
       - id: ruff
         name: Fix with ruff
-        entry: poetry run ruff dsws_client/ tests/
+        entry: ruff check
+        args: ["--force-exclude", "--extend-fixable=ERA001,F401,F841"]
+        require_serial: true
         language: system
         types: [python]
-        args: ["--force-exclude", "--extend-fixable=ERA001,F401,F841"]
 
-      - id: black
-        name: black
-        entry: black
+      - id: ruff
+        name: Format with ruff
+        entry: ruff format
         require_serial: true
         language: system
         types: [python]
