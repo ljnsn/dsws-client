@@ -134,5 +134,8 @@ dmypy.json
 # IDEs
 .idea/
 
+# pdm
+.pdm-python
+
 Datastream/
 scratch*

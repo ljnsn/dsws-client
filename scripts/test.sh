@@ -3,4 +3,4 @@
 set -e
 set -x
 
-poetry run pytest --cov dsws_client --cov-report xml tests
+pdm run pytest --cov dsws_client --cov-report xml tests

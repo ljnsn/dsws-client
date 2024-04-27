@@ -71,7 +71,7 @@ def convert_model_list(
 
 
 def convert_key_value_pairs(
-    items: Union[List[DSStringKVPair], Dict[str, str]]
+    items: Union[List[DSStringKVPair], Dict[str, str]],
 ) -> DSStringKVPair:
     """Convert a dictionary to a list of key-value pairs."""
     if isinstance(items, list):
