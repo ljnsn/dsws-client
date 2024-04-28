@@ -20,6 +20,7 @@ class DSWSConfig:
     ssl_cert: Optional[str] = None
     app_id: str = f"dsws-client-{__version__}"
     data_source: Optional[str] = None
+    max_concurrency: int = 1
     debug: bool = attrs.field(default=False, converter=attrs.converters.to_bool)
 
     def __init__(self, **kwargs: Any) -> None:
