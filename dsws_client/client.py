@@ -330,10 +330,7 @@ class DSWSClient:
     ) -> ResponseCls:
         """Execute a request."""
         logger.debug("executing request")
-        if self._app_id is not None:
-            request.properties.append(DSStringKVPair("__AppId", self._app_id))
-        if self._data_source is not None:
-            request.properties.append(DSStringKVPair("Source", self._data_source))
+        self._prep_request(request)
         request_data = msgspec.json.encode(request)
         if self._debug:
             sys.stdout.write(f"sending request: {request_data!s}")
@@ -352,3 +349,10 @@ class DSWSClient:
         if self._debug:
             sys.stdout.write(f"received response: {response_decoded!s}")
         return response_decoded
+
+    def _prep_request(self, request: DSRequest) -> None:
+        """Prepare a request."""
+        if self._app_id is not None:
+            request.properties.append(DSStringKVPair("__AppId", self._app_id))
+        if self._data_source is not None:
+            request.properties.append(DSStringKVPair("Source", self._data_source))
