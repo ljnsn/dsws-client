@@ -3,4 +3,6 @@
 set -e
 set -x
 
-pdm run pytest --cov dsws_client --cov-report xml tests
+pdm run coverage run
+pdm run coverage report
+pdm run coverage xml
