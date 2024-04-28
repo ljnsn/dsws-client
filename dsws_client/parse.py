@@ -1,6 +1,7 @@
 import collections
 import datetime as dt
 import logging
+from collections.abc import Iterable
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import msgspec
@@ -60,7 +61,7 @@ class ParsedResponse(msgspec.Struct):
 
 
 def responses_to_records(
-    responses: List[DSDataResponse],
+    responses: Iterable[DSDataResponse],
     *,
     process_strings: bool = True,
 ) -> ParsedResponse:
