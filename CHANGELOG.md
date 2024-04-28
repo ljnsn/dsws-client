@@ -1,3 +1,46 @@
+## v1.0.0 (2024-04-28)
+
+### 🐛🚑️ Fixes
+
+- **parse**: don't return errors for all dates (#142)
+- import from typing for 38
+- simplify client
+
+### ♻️  Refactorings
+
+- **client**: drop threaded arg
+- **client**: split off prep request
+- httpx (#138)
+- switch to msgspec (#136)
+
+### ⚡️ Performance
+
+- concurrent fetch all (#139)
+- **client**: use itertools instead of loop
+
+### 💚👷 CI & Build
+
+- set corrent env vars for pdm
+
+### 📌➕⬇️ ➖⬆️  Dependencies
+
+- cz-conventional-gitmoji
+
+### 📝💡 Documentation
+
+- **client**: docstring convention (#144)
+- **client**: client docstring (#140)
+
+### 🔥⚰️  Clean up
+
+- **config**: client args
+
+### 🔧🔨📦️ Configuration, Scripts, Packages
+
+- **commitizen**: annotate tags
+- move commitizen to dev dependencies
+- **test**: use coverage (#143)
+
 ## v0.2.5 (2024-04-28)
 
 ### 🐛🚑️ Fixes
