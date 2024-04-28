@@ -1,4 +1,8 @@
 [project]
+name = "dsws-client"
+version = "0.2.3"
+description = "Python client for the Datastream Web Service API (DSWS)"
+readme = "README.md"
 authors = [{ name = "ljnsn", email = "info@ljnsn.com" }]
 license = { text = "MIT" }
 requires-python = ">=3.8,<4.0"
@@ -11,10 +15,6 @@ dependencies = [
   "setuptools; python_version >= \"3.12\"",
   "typing-extensions>=4.11.0; python_version < \"3.10\"",
 ]
-name = "dsws-client"
-version = "0.2.3"
-description = "Python client for the Datastream Web Service API (DSWS)"
-readme = "README.md"
 
 [tool.pdm]
 distribution = true
