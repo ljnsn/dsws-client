@@ -1,7 +1,9 @@
 import os
-from typing import Any, ClassVar, Optional
+import urllib.parse
+from typing import Any, ClassVar, Dict, Optional
 
 import attrs
+import httpx
 from dotenv import load_dotenv
 
 from dsws_client.version import __version__
@@ -12,7 +14,7 @@ class DSWSConfig:
     """Configuration for the DSWS client."""
 
     path: ClassVar[str] = "/DSWSClient/V1/DSService.svc/rest/"
-    base_url: str = "https://product.datastream.com"
+    host: str = "https://product.datastream.com"
     timeout: int = attrs.field(default=180, converter=int)
     proxy: Optional[str] = None
     ssl_cert: Optional[str] = None
@@ -30,3 +32,29 @@ class DSWSConfig:
             if value is not None:
                 init_dict[field.name] = value
         self.__attrs_init__(**init_dict)  # type: ignore[attr-defined]
+
+    @property
+    def base_url(self) -> str:
+        """Return the base URL."""
+        return urllib.parse.urljoin(self.host, self.path)
+
+    @property
+    def proxies(self) -> Optional[Dict[str, httpx.HTTPTransport]]:
+        """Return the proxies."""
+        proxy = httpx.HTTPTransport(proxy=self.proxy)
+        return {"https://": proxy, "http://": proxy} if self.proxy else None
+
+    @property
+    def client_args(self) -> Dict[str, Any]:
+        """Return the client arguments."""
+        return dict(
+            filter(
+                lambda x: x[1] is not None,
+                {
+                    "base_url": self.base_url,
+                    "timeout": self.timeout,
+                    "proxies": self.proxies,
+                    "verify": self.ssl_cert,
+                }.items(),
+            )
+        )
