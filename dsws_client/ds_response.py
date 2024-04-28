@@ -209,7 +209,7 @@ class DSDataResponse(msgspec.Struct, rename="pascal"):
     tag: Optional[str]
 
     def pydates(self) -> Optional[List[dt.datetime]]:
-        """The foo property."""
+        """Return response dates as python dates."""
         if self.dates is None:
             return None
         return [converters.convert_date(date_str) for date_str in self.dates]
