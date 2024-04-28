@@ -14,14 +14,14 @@ from typing import (
     Union,
 )
 
+import msgspec
+
+from dsws_client.value_objects import DSStringKVPair, enums
+
 if sys.version_info >= (3, 9):
     from typing import Annotated
 else:
     from typing_extensions import Annotated
-
-import msgspec
-
-from dsws_client.value_objects import DSStringKVPair, enums
 
 # request limits
 MAX_INSTRUMENTS_PER_REQUEST = 50

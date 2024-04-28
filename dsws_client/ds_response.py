@@ -4,11 +4,6 @@ import datetime as dt
 import sys
 from typing import Any, List, Optional, Union
 
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
-
 import msgspec
 
 from dsws_client import converters
@@ -17,6 +12,11 @@ from dsws_client.value_objects import (
     Token,
     enums,
 )
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 BOOL_MAPPING = {
     "Y": True,
