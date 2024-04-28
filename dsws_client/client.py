@@ -6,8 +6,8 @@ import sys
 import urllib.parse
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
+import httpx
 import msgspec
-import requests
 
 from dsws_client.config import DSWSConfig
 from dsws_client.ds_request import (
@@ -54,7 +54,6 @@ class DSWSClient:
         self._username = username
         self._password = password
         self._url = urllib.parse.urljoin(config.base_url, config.path)
-        self._session = requests.Session()
         self._proxies = (
             None
             if config.proxy is None
@@ -66,6 +65,13 @@ class DSWSClient:
         self._app_id = config.app_id
         self._data_source = config.data_source
         self._debug = config.debug
+        self._session = httpx.Client(
+            base_url=config.base_url,
+            timeout=config.timeout,
+            proxies=self._proxies,
+            verify=self._ssl_cert or True,
+            headers={"Content-Type": "application/json"},
+        )
 
     @property
     def token(self) -> str:
@@ -318,13 +324,9 @@ class DSWSClient:
             sys.stdout.write(f"sending request: {request_data!s}")
         response = self._session.post(
             request_url,
-            data=request_data,
-            proxies=self._proxies,
-            verify=self._ssl_cert,
-            timeout=self._timeout,
-            headers={"Content-Type": "application/json"},
+            content=request_data,
         )
-        if not response.ok:
+        if not response.is_success:
             msg = f"request failed: {response.text}"
             raise RequestFailedError(msg, response.status_code)
         try:
