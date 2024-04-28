@@ -44,18 +44,3 @@ class DSWSConfig:
         """Return the proxies."""
         proxy = httpx.HTTPTransport(proxy=self.proxy)
         return {"https://": proxy, "http://": proxy} if self.proxy else None
-
-    @property
-    def client_args(self) -> Dict[str, Any]:
-        """Return the client arguments."""
-        return dict(
-            filter(
-                lambda x: x[1] is not None,
-                {
-                    "base_url": self.base_url,
-                    "timeout": self.timeout,
-                    "proxies": self.proxies,
-                    "verify": self.ssl_cert,
-                }.items(),
-            )
-        )
