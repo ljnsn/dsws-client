@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:e251f73b85b76d8b76489ee86834ba08c30d081f013490c832eb84b147651ece"
+content_hash = "sha256:cb943c960d681aaaa530bc73de00644c8a8b457441abb445264ffbf9425cbd16"
 
 [[package]]
 name = "argcomplete"
