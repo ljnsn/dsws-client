@@ -180,8 +180,9 @@ class DSWSClient:
         """Fetch as many bundles as needed to get all items."""
         if threaded:
             yield from self.fetch_all_threaded(request_bundles)
-        for bundle in request_bundles:
-            yield self.fetch_bundle(bundle)
+        else:
+            for bundle in request_bundles:
+                yield self.fetch_bundle(bundle)
 
     def fetch_all_threaded(
         self,
