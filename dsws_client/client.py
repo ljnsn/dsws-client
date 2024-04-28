@@ -44,23 +44,22 @@ class DSWSClient:
 
     It can be shared between threads.
 
-    **Parameters:**
-
-    * **username** - The DSWS username.
-    * **password** - The DSWS password.
-    * **host** - *(default: https://product.datastream.com)* The DSWS host URL.
-    * **timeout** - *(default: 180)* The timeout configuration to use when
-    sending requests.
-    * **proxy** - *(optional)* A proxy URL where all the traffic should be routed.
-    * **ssl_cert** - *(optional)* SSL certificates (a.k.a CA bundle) used to
-    verify the identity of requested hosts.
-    * **app_id** - *(default: dsws-client-VERSION)* The app ID to use in the
-    request.
-    * **data_source** - *(optional)* The data source to use in the request.
-    * **max_concurrency** - *(default: 1)* The maximum number of concurrent
-    requests to make.
-    * **debug** - *(default: False)* If True, print the request and response
-    data to stdout.
+    Args:
+        username: The DSWS username.
+        password: The DSWS password.
+        host (default: "https://product.datastream.com"): The DSWS host URL.
+        timeout (default: 180): The timeout configuration to use when sending
+            requests.
+        proxy (optional): A proxy URL where all the traffic should be routed.
+        ssl_cert (optional): SSL certificates (a.k.a CA bundle) used to
+            verify the identity of requested hosts.
+        app_id (default: dsws-client-VERSION): The app ID to use in the
+            request.
+        data_source (optional): The data source to use in the request.
+        max_concurrency (default: 1): The maximum number of concurrent
+            requests to make.
+        debug (default: False): If True, print the request and response
+            data to stdout.
     """
 
     def __init__(self, username: str, password: str, **kwargs: Any) -> None:
