@@ -39,7 +39,7 @@ class DSWSConfig:
         return urllib.parse.urljoin(self.host, self.path)
 
     @property
-    def proxies(self) -> Dict[str, httpx.HTTPTransport] | None:
+    def proxies(self) -> Optional[Dict[str, httpx.HTTPTransport]]:
         """Return the proxies."""
         proxy = httpx.HTTPTransport(proxy=self.proxy)
         return {"https://": proxy, "http://": proxy} if self.proxy else None
