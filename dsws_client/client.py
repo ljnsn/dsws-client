@@ -132,6 +132,7 @@ class DSWSClient:
         Returns:
             A data response.
         """
+        logger.debug("fetching one")
         return self._execute_request(
             DSGetDataRequest(
                 token_value=self.token,
@@ -158,6 +159,7 @@ class DSWSClient:
         Returns:
             A data bundle response.
         """
+        logger.debug("fetching bundle")
         return self._execute_request(
             DSGetDataBundleRequest(
                 token_value=self.token,
@@ -193,9 +195,8 @@ class DSWSClient:
             futures = [
                 executor.submit(self.fetch_bundle, bundle) for bundle in request_bundles
             ]
-            return (
-                future.result() for future in concurrent.futures.as_completed(futures)
-            )
+            for future in concurrent.futures.as_completed(futures):
+                yield future.result()
 
     def fetch_token(self, **kwargs: object) -> Token:
         """
@@ -298,6 +299,7 @@ class DSWSClient:
         response_cls: Type[ResponseCls],
     ) -> ResponseCls:
         """Execute a request."""
+        logger.debug("executing request")
         if self._app_id is not None:
             request.properties.append(DSStringKVPair("__AppId", self._app_id))
         if self._data_source is not None:
