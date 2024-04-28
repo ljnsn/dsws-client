@@ -1,5 +1,6 @@
+import datetime as dt
 import random
-from typing import List, Optional, Union
+from typing import List, Optional, Type, Union
 
 import pytest
 from dsws_client.ds_request import (
@@ -12,7 +13,6 @@ from dsws_client.ds_request import (
     DSGetDataBundleRequest,
     DSInstrument,
 )
-from dsws_client.exceptions import InvalidRequestError
 from dsws_client.value_objects import (
     DSDateName,
     DSInstrumentPropertyName,
@@ -26,23 +26,25 @@ def token_fix() -> str:
     return "test-token"
 
 
-def make_snapshot_date(date: Union[str, DSDateName] = "2018-01-01") -> DSDate:
+def make_snapshot_date(
+    date: Union[str, dt.date, DSDateName] = dt.date(2018, 1, 1),
+) -> DSDate:
     """Return a snapshot date."""
-    return DSDate(
+    return DSDate.construct(
         start=date,
-        end="",
+        end=None,
         frequency=None,
         kind=0,
     )
 
 
 def make_timeseries_date(
-    start: Union[str, DSDateName] = "2018-01-01",
-    end: Union[str, DSDateName] = "2018-01-02",
+    start: Union[str, dt.date, DSDateName] = dt.date(2018, 1, 1),
+    end: Union[str, dt.date, DSDateName] = dt.date(2018, 1, 1),
     frequency: str = "D",
 ) -> DSDate:
     """Return a fixed timeseries date."""
-    return DSDate(
+    return DSDate.construct(
         start=start,
         end=end,
         frequency=frequency,
@@ -98,24 +100,24 @@ def test_request_instantiation(date: DSDate) -> None:
         (
             DSInstrument(",".join(["DUMMY"] * (MAX_INSTRUMENTS_PER_REQUEST + 1))),
             [DSDataType("P")],
-            InvalidRequestError,
+            ValueError,
         ),
         (
             DSInstrument("DUMMY"),
             [DSDataType("P")] * (MAX_DATATYPES_PER_REQUEST + 1),
-            InvalidRequestError,
+            ValueError,
         ),
         (
             DSInstrument(",".join(["DUMMY"] * 40)),
             [DSDataType("P")] * 3,
-            InvalidRequestError,
+            ValueError,
         ),
     ],
 )
 def test_request_validation(
     instrument: DSInstrument,
     data_types: List[DSDataType],
-    expected: Exception,
+    expected: Type[Exception],
 ) -> None:
     """Verify that requests are validated properly."""
     with pytest.raises(expected):
@@ -132,7 +134,7 @@ def test_bundle_validation(token: str) -> None:
         make_data_request(random_date()) for _ in range(MAX_ITEMS_PER_BUNDLE + 1)
     ]
 
-    with pytest.raises(InvalidRequestError):
+    with pytest.raises(ValueError):  # noqa: PT011
         DSGetDataBundleRequest(data_requests=requests, token_value=token)
 
 

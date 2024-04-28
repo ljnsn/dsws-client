@@ -1,35 +1,42 @@
 [project]
-authors = [{ name = "ljnsn", email = "info@ljnsn.com" }]
-license = { text = "MIT" }
-requires-python = ">=3.8,<4.0"
-dependencies = [
-  "requests>=2.29.0",
-  "attrs>=23.1.0",
-  "python-dotenv>=1.0.0",
-  "setuptools; python_version >= \"3.12\"",
-]
 name = "dsws-client"
 version = "0.2.5"
 description = "Python client for the Datastream Web Service API (DSWS)"
 readme = "README.md"
+authors = [{ name = "ljnsn", email = "info@ljnsn.com" }]
+license = { text = "MIT" }
+requires-python = ">=3.8,<4.0"
+dependencies = [
+  "attrs>=23.1.0",
+  "commitizen>=2.42.0",
+  "msgspec>=0.18.6",
+  "python-dotenv>=1.0.0",
+  "requests>=2.29.0",
+  "setuptools; python_version >= \"3.12\"",
+  "typing-extensions>=4.11.0; python_version < \"3.10\"",
+]
 
 [tool.pdm]
 distribution = true
 
 [tool.pdm.dev-dependencies]
 dev = [
-  "commitizen>=2.42.0",
-  "pytest>=7.3.1",
-  "mypy>=1.2.0",
-  "ruff>=0.0.269",
-  "pytest-cov>=4",
-  "types-requests>=2.29.0.0",
   "cz-conventional-gitmoji>=0.1.3",
+  "ipython>=8.12.3",
+  "mypy>=1.2.0",
   "pre-commit>=2.0",
+  "pytest-cov>=4",
+  "pytest>=7.3.1",
+  "ruff>=0.0.269",
+  "types-requests>=2.29.0.0",
 ]
 
 [tool.pdm.build]
 includes = ["dsws_client"]
+
+[tool.pdm.scripts]
+lint = "./scripts/lint.sh"
+test = "./scripts/test.sh"
 
 [tool.commitizen]
 name = "cz_gitmoji"
@@ -59,7 +66,6 @@ output = "reports/coverage.xml"
 
 [tool.mypy]
 junit_xml = "reports/mypy.xml"
-plugins = "pydantic.mypy"
 strict = true
 disallow_subclassing_any = false
 disallow_untyped_decorators = false
