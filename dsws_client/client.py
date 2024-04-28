@@ -1,9 +1,11 @@
-import json
+"""The DSWS client."""
+
 import logging
 import sys
 import urllib.parse
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
+import msgspec
 import requests
 
 from dsws_client.config import DSWSConfig
@@ -17,7 +19,6 @@ from dsws_client.ds_request import (
     DSInstrument,
     DSRequest,
     bundle_identifiers,
-    to_ds_dict,
 )
 from dsws_client.ds_response import (
     DSGetDataBundleResponse,
@@ -29,7 +30,7 @@ from dsws_client.exceptions import (
     RequestFailedError,
 )
 from dsws_client.parse import ParsedResponse, responses_to_records
-from dsws_client.value_objects import DateType, DSStringKVPair
+from dsws_client.value_objects import DateType, DSStringKVPair, Token
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ class DSWSClient:
         )
         self._timeout = config.timeout
         self._ssl_cert = config.ssl_cert
-        self._token_response: Optional[DSGetTokenResponse] = None
+        self._token: Optional[Token] = None
         self._app_id = config.app_id
         self._data_source = config.data_source
         self._debug = config.debug
@@ -68,15 +69,15 @@ class DSWSClient:
     @property
     def token(self) -> str:
         """Get a token."""
-        if self._token_response is None or self._token_response.is_expired:
-            self._token_response = self.get_token()
-        return self._token_response.token_value
+        if self._token is None or self._token.is_expired:
+            self._token = self.get_token()
+        return self._token.token_value
 
     def fetch_snapshot_data(
         self,
         identifiers: List[str],
         fields: List[str],
-        start: DateType = "",
+        start: Optional[DateType] = None,
         tag: Optional[str] = None,
     ) -> ParsedResponse:
         """Fetch snapshot data."""
@@ -84,7 +85,7 @@ class DSWSClient:
             identifiers=identifiers,
             fields=fields,
             start=start,
-            end="",
+            end=None,
             frequency=None,
             kind=0,
             tag=tag,
@@ -100,8 +101,8 @@ class DSWSClient:
         self,
         identifiers: List[str],
         fields: List[str],
-        start: DateType = "",
-        end: DateType = "",
+        start: Optional[DateType] = None,
+        end: Optional[DateType] = None,
         frequency: str = "D",
         tag: Optional[str] = None,
     ) -> ParsedResponse:
@@ -126,8 +127,8 @@ class DSWSClient:
         self,
         identifiers: Union[str, List[str]],
         fields: List[str],
-        start: DateType,
-        end: DateType = "",
+        start: Optional[DateType],
+        end: Optional[DateType] = None,
         frequency: str = "D",
         kind: int = 1,
         tag: Optional[str] = None,
@@ -157,8 +158,8 @@ class DSWSClient:
         self,
         identifiers: List[str],
         fields: List[str],
-        start: DateType,
-        end: DateType = "",
+        start: Optional[DateType],
+        end: Optional[DateType] = None,
         frequency: Optional[str] = "D",
         kind: int = 1,
         tag: Optional[str] = None,
@@ -177,12 +178,12 @@ class DSWSClient:
         data_types = [
             DSDataType.construct(
                 field,
-                return_names=return_field_names,
+                return_name=return_field_names,
                 properties=field_props,
             )
             for field in fields
         ]
-        date = DSDate(start, end, frequency, kind)
+        date = DSDate.construct(start, end, frequency, kind)
         identifier_bundles = bundle_identifiers(instrument, len(data_types))
         responses = []
         for identifier_bundle in identifier_bundles:
@@ -194,7 +195,7 @@ class DSWSClient:
             responses.append(self.get_data_bundle(data_requests))
         return responses
 
-    def get_token(self, **kwargs: Any) -> DSGetTokenResponse:
+    def get_token(self, **kwargs: object) -> Token:
         """
         Fetch a new token.
 
@@ -202,14 +203,25 @@ class DSWSClient:
             **kwargs: Additional properties to set on the request.
 
         Returns:
-            A token response.
+            A token.
         """
-        return self._execute_request(
-            DSGetTokenRequest(self._username, self._password, properties=kwargs),
+        token_response = self._execute_request(
+            DSGetTokenRequest(
+                self._username,
+                self._password,
+                properties=[
+                    DSStringKVPair(key, value) for key, value in kwargs.items()
+                ],
+            ),
             DSGetTokenResponse,
         )
+        return token_response.to_token()
 
-    def get_data(self, data_request: DSDataRequest, **kwargs: Any) -> DSGetDataResponse:
+    def get_data(
+        self,
+        data_request: DSDataRequest,
+        **kwargs: object,
+    ) -> DSGetDataResponse:
         """
         Post a data request.
 
@@ -224,7 +236,9 @@ class DSWSClient:
             DSGetDataRequest(
                 token_value=self.token,
                 data_request=data_request,
-                properties=kwargs,
+                properties=[
+                    DSStringKVPair(key, value) for key, value in kwargs.items()
+                ],
             ),
             DSGetDataResponse,
         )
@@ -232,7 +246,7 @@ class DSWSClient:
     def get_data_bundle(
         self,
         data_requests: List[DSDataRequest],
-        **kwargs: Any,
+        **kwargs: object,
     ) -> DSGetDataBundleResponse:
         """
         Post multiple data requests.
@@ -248,7 +262,9 @@ class DSWSClient:
             DSGetDataBundleRequest(
                 token_value=self.token,
                 data_requests=data_requests,
-                properties=kwargs,
+                properties=[
+                    DSStringKVPair(key, value) for key, value in kwargs.items()
+                ],
             ),
             DSGetDataBundleResponse,
         )
@@ -257,8 +273,8 @@ class DSWSClient:
         self,
         identifiers: Union[str, List[str]],
         fields: List[str],
-        start: DateType,
-        end: DateType,
+        start: Optional[DateType],
+        end: Optional[DateType],
         frequency: Optional[str],
         kind: int,
         tag: Optional[str] = None,
@@ -277,12 +293,12 @@ class DSWSClient:
         data_types = [
             DSDataType.construct(
                 field,
-                return_names=return_field_names,
+                return_name=return_field_names,
                 properties=field_props,
             )
             for field in fields
         ]
-        date = DSDate(start, end, frequency, kind)
+        date = DSDate.construct(start, end, frequency, kind)
         return DSDataRequest(instrument, data_types, date, tag)
 
     def _execute_request(
@@ -296,24 +312,25 @@ class DSWSClient:
         if self._data_source is not None:
             request.properties.append(DSStringKVPair("Source", self._data_source))
         request_url = urllib.parse.urljoin(self._url, request.path)
-        request_dict = to_ds_dict(request)
+        request_data = msgspec.json.encode(request)
         if self._debug:
-            sys.stdout.write(f"sending request: {request_dict!s}")
+            sys.stdout.write(f"sending request: {request_data!s}")
         response = self._session.post(
             request_url,
-            json=request_dict,
+            data=request_data,
             proxies=self._proxies,
             verify=self._ssl_cert,
             timeout=self._timeout,
+            headers={"Content-Type": "application/json"},
         )
         if not response.ok:
             msg = f"request failed: {response.text}"
             raise RequestFailedError(msg, response.status_code)
         try:
-            json_response = response.json()
-        except json.JSONDecodeError as exc:
+            response_decoded = msgspec.json.decode(response.content, type=response_cls)
+        except (msgspec.ValidationError, ValueError, TypeError) as exc:
             msg = f"invalid response: {response.text}"
             raise InvalidResponseError(msg) from exc
         if self._debug:
-            sys.stdout.write(f"received response: {json_response!s}")
-        return response_cls(**json_response)
+            sys.stdout.write(f"received response: {response_decoded!s}")
+        return response_decoded
