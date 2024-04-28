@@ -3,8 +3,7 @@
 import itertools
 import logging
 import sys
-from collections.abc import Iterator
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Iterator, List, Optional, Type, TypeVar, Union
 
 import httpx
 import msgspec

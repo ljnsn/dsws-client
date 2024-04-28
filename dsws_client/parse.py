@@ -1,8 +1,7 @@
 import collections
 import datetime as dt
 import logging
-from collections.abc import Iterable
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import msgspec
 
