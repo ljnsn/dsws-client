@@ -3,6 +3,7 @@
 import itertools
 import logging
 import sys
+from collections.abc import Iterator
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
 import httpx
@@ -41,14 +42,6 @@ class DSWSClient:
     """Client for the DSWS web service."""
 
     def __init__(self, username: str, password: str, **kwargs: Any) -> None:
-        """
-        Initialize the client.
-
-        Args:
-            username: DSWS username.
-            password: DSWS password.
-            **kwargs: Additional keyword arguments passed to the config object.
-        """
         config = DSWSConfig(**kwargs)
         self._username = username
         self._password = password
@@ -68,7 +61,7 @@ class DSWSClient:
     def token(self) -> str:
         """Get a token."""
         if self._token is None or self._token.is_expired:
-            self._token = self.get_token()
+            self._token = self.fetch_token()
         return self._token.token_value
 
     def fetch_snapshot_data(
@@ -79,7 +72,7 @@ class DSWSClient:
         tag: Optional[str] = None,
     ) -> ParsedResponse:
         """Fetch snapshot data."""
-        responses = self.fetch_all(
+        request_bundles = self.construct_request_bundles(
             identifiers=identifiers,
             fields=fields,
             start=start,
@@ -90,10 +83,11 @@ class DSWSClient:
             return_symbol_names=True,
             return_field_names=True,
         )
+        responses = self.fetch_all(request_bundles)
         data_responses = itertools.chain.from_iterable(
             response.data_responses for response in responses
         )
-        return responses_to_records(list(data_responses))
+        return responses_to_records(data_responses)
 
     def fetch_timeseries_data(  # noqa: PLR0913
         self,
@@ -105,7 +99,7 @@ class DSWSClient:
         tag: Optional[str] = None,
     ) -> ParsedResponse:
         """Fetch timeseries data."""
-        responses = self.fetch_all(
+        request_bundles = self.construct_request_bundles(
             identifiers=identifiers,
             fields=fields,
             start=start,
@@ -116,106 +110,13 @@ class DSWSClient:
             return_symbol_names=True,
             return_field_names=True,
         )
+        responses = self.fetch_all(request_bundles)
         data_responses = itertools.chain.from_iterable(
             response.data_responses for response in responses
         )
-        return responses_to_records(list(data_responses))
+        return responses_to_records(data_responses)
 
-    def fetch_one(  # noqa: PLR0913
-        self,
-        identifiers: Union[str, List[str]],
-        fields: List[str],
-        start: Optional[DateType],
-        end: Optional[DateType] = None,
-        frequency: str = "D",
-        kind: int = 1,
-        tag: Optional[str] = None,
-        *,
-        return_symbol_names: bool = False,
-        return_field_names: bool = False,
-        instrument_props: Optional[Dict[str, str]] = None,
-        field_props: Optional[Dict[str, str]] = None,
-    ) -> DSGetDataResponse:
-        """Fetch data from the DSWS web service."""
-        request = self.construct_request(
-            identifiers=identifiers,
-            fields=fields,
-            start=start,
-            end=end,
-            frequency=frequency,
-            kind=kind,
-            tag=tag,
-            return_symbol_names=return_symbol_names,
-            return_field_names=return_field_names,
-            instrument_props=instrument_props,
-            field_props=field_props,
-        )
-        return self.get_data(request)
-
-    def fetch_all(  # noqa: PLR0913
-        self,
-        identifiers: List[str],
-        fields: List[str],
-        start: Optional[DateType],
-        end: Optional[DateType] = None,
-        frequency: Optional[str] = "D",
-        kind: int = 1,
-        tag: Optional[str] = None,
-        *,
-        return_symbol_names: bool = False,
-        return_field_names: bool = False,
-        instrument_props: Optional[Dict[str, str]] = None,
-        field_props: Optional[Dict[str, str]] = None,
-    ) -> List[DSGetDataBundleResponse]:
-        """Fetch as many bundles as needed to get all items."""
-        instrument = DSInstrument.construct(
-            identifiers,
-            return_names=return_symbol_names,
-            properties=instrument_props,
-        )
-        data_types = [
-            DSDataType.construct(
-                field,
-                return_name=return_field_names,
-                properties=field_props,
-            )
-            for field in fields
-        ]
-        date = DSDate.construct(start, end, frequency, kind)
-        identifier_bundles = bundle_identifiers(instrument, len(data_types))
-        responses = []
-        for identifier_bundle in identifier_bundles:
-            data_requests = []
-            for instrument in identifier_bundle:
-                data_requests.append(
-                    DSDataRequest(instrument, data_types, date, tag=tag)
-                )
-            responses.append(self.get_data_bundle(data_requests))
-        return responses
-
-    def get_token(self, **kwargs: object) -> Token:
-        """
-        Fetch a new token.
-
-        Args:
-            **kwargs: Additional properties to set on the request.
-
-        Returns:
-            A token.
-        """
-        token_response = self._execute_request(
-            DSGetTokenRequest(
-                self._username,
-                self._password,
-                properties=[
-                    DSStringKVPair(key, value) for key, value in kwargs.items()
-                ],
-            ),
-            DSGetTokenResponse,
-        )
-        return token_response.to_token()
-
-    def get_data(
+    def fetch_one(
         self,
         data_request: DSDataRequest,
         **kwargs: object,
@@ -241,7 +142,7 @@ class DSWSClient:
             DSGetDataResponse,
         )
 
-    def get_data_bundle(
+    def fetch_bundle(
         self,
         data_requests: List[DSDataRequest],
         **kwargs: object,
@@ -266,6 +167,36 @@ class DSWSClient:
             ),
             DSGetDataBundleResponse,
         )
+
+    def fetch_all(
+        self,
+        request_bundles: List[List[DSDataRequest]],
+    ) -> Iterator[DSGetDataBundleResponse]:
+        """Fetch as many bundles as needed to get all items."""
+        for bundle in request_bundles:
+            yield self.fetch_bundle(bundle)
+
+    def fetch_token(self, **kwargs: object) -> Token:
+        """
+        Fetch a new token.
+
+        Args:
+            **kwargs: Additional properties to set on the request.
+
+        Returns:
+            A token.
+        """
+        token_response = self._execute_request(
+            DSGetTokenRequest(
+                self._username,
+                self._password,
+                properties=[
+                    DSStringKVPair(key, value) for key, value in kwargs.items()
+                ],
+            ),
+            DSGetTokenResponse,
+        )
+        return token_response.to_token()
 
     def construct_request(  # noqa: PLR0913
         self,
@@ -298,6 +229,47 @@ class DSWSClient:
         ]
         date = DSDate.construct(start, end, frequency, kind)
         return DSDataRequest(instrument, data_types, date, tag)
+
+    def construct_request_bundles(  # noqa: PLR0913
+        self,
+        identifiers: List[str],
+        fields: List[str],
+        start: Optional[DateType],
+        end: Optional[DateType],
+        frequency: Optional[str],
+        kind: int,
+        tag: Optional[str] = None,
+        *,
+        return_symbol_names: bool = False,
+        return_field_names: bool = False,
+        instrument_props: Optional[Dict[str, str]] = None,
+        field_props: Optional[Dict[str, str]] = None,
+    ) -> List[List[DSDataRequest]]:
+        """Construct a list of data request bundles."""
+        instrument = DSInstrument.construct(
+            identifiers,
+            return_names=return_symbol_names,
+            properties=instrument_props,
+        )
+        data_types = [
+            DSDataType.construct(
+                field,
+                return_name=return_field_names,
+                properties=field_props,
+            )
+            for field in fields
+        ]
+        date = DSDate.construct(start, end, frequency, kind)
+        identifier_bundles = bundle_identifiers(instrument, len(data_types))
+        request_bundles = []
+        for identifier_bundle in identifier_bundles:
+            data_requests = []
+            for instrument in identifier_bundle:
+                data_requests.append(
+                    DSDataRequest(instrument, data_types, date, tag=tag)
+                )
+            request_bundles.append(data_requests)
+        return request_bundles
 
     def _execute_request(
         self,

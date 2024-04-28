@@ -33,7 +33,7 @@ def tag_fix() -> str:
 @pytest.mark.skipif(not has_credentials(), reason="no credentials available")
 def test_get_token(client: DSWSClient) -> None:
     """Test get_token method."""
-    token_response = client.get_token()
+    token_response = client.fetch_token()
 
     assert token_response.token_value is not None
     assert token_response.token_expiry is not None
