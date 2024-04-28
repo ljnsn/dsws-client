@@ -44,13 +44,6 @@ class DSWSClient:
 
     It can be shared between threads.
 
-    Usage:
-
-    ```python
-    >>> client = DSWSClient()
-    >>> response = client.fetch_snapshot_data(["VOD", "U:JPM"], ["NAME", "ISIN"])
-    ```
-
     **Parameters:**
 
     * **username** - The DSWS username.
