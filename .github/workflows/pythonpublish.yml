@@ -21,6 +21,7 @@ jobs:
           pdm sync
       - name: Publish
         env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.POETRY_PYPI_TOKEN_PYPI }}
+          PDM_PUBLISH_USERNAME: __token__
+          PDM_PUBLISH_PASSWORD: ${{ secrets.POETRY_PYPI_TOKEN_PYPI }}
         run: |
           ./scripts/publish.sh
