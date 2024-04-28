@@ -129,10 +129,7 @@ def process_symbol_value(  # noqa: PLR0913
     value = symbol_value.parse()
     if isinstance(symbol_value, DSString) and process_strings:
         value = process_string_value(value)  # type: ignore[arg-type]
-    if is_error:
-        for date in dates:
-            records[(symbol_value.symbol, date)][field] = value
-    elif isinstance(value, list):
+    if isinstance(value, list):
         if len(value) != len(dates):
             raise InvalidResponseError(
                 "Number of values does not match number of dates."
@@ -140,7 +137,7 @@ def process_symbol_value(  # noqa: PLR0913
         for date, xvalue in zip(dates, value):
             records[(symbol_value.symbol, date)][field] = xvalue
     else:
-        if len(dates) > 1:
+        if len(dates) > 1 and not is_error:
             raise InvalidResponseError("More than one date found for single value.")
         records[(symbol_value.symbol, dates[0])][field] = value
 
