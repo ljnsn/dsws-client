@@ -5,7 +5,6 @@ requires-python = ">=3.8,<4.0"
 dependencies = [
   "requests>=2.29.0",
   "attrs>=23.1.0",
-  "commitizen>=2.42.0",
   "python-dotenv>=1.0.0",
   "setuptools; python_version >= \"3.12\"",
 ]
@@ -19,6 +18,7 @@ distribution = true
 
 [tool.pdm.dev-dependencies]
 dev = [
+  "commitizen>=2.42.0",
   "pytest>=7.3.1",
   "mypy>=1.2.0",
   "ruff>=0.0.269",
