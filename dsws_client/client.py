@@ -1,5 +1,6 @@
 """The DSWS client."""
 
+import itertools
 import logging
 import sys
 import urllib.parse
@@ -92,10 +93,10 @@ class DSWSClient:
             return_symbol_names=True,
             return_field_names=True,
         )
-        data_responses = []
-        for response in responses:
-            data_responses.extend(response.data_responses)
-        return responses_to_records(data_responses)
+        data_responses = itertools.chain.from_iterable(
+            response.data_responses for response in responses
+        )
+        return responses_to_records(list(data_responses))
 
     def fetch_timeseries_data(  # noqa: PLR0913
         self,
@@ -118,10 +119,10 @@ class DSWSClient:
             return_symbol_names=True,
             return_field_names=True,
         )
-        data_responses = []
-        for response in responses:
-            data_responses.extend(response.data_responses)
-        return responses_to_records(data_responses)
+        data_responses = itertools.chain.from_iterable(
+            response.data_responses for response in responses
+        )
+        return responses_to_records(list(data_responses))
 
     def fetch_one(  # noqa: PLR0913
         self,
