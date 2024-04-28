@@ -34,6 +34,10 @@ dev = [
 [tool.pdm.build]
 includes = ["dsws_client"]
 
+[tool.pdm.scripts]
+lint = "./scripts/lint.sh"
+test = "./scripts/test.sh"
+
 [tool.commitizen]
 name = "cz_gitmoji"
 version_provider = "pep621"
