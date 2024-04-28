@@ -1,5 +1,6 @@
 """The DSWS client."""
 
+import concurrent.futures
 import itertools
 import logging
 import sys
@@ -51,6 +52,7 @@ class DSWSClient:
             verify=config.ssl_cert or True,
             headers={"Content-Type": "application/json"},
         )
+        self._max_concurrency = config.max_concurrency
         self._app_id = config.app_id
         self._data_source = config.data_source
         self._debug = config.debug
@@ -82,7 +84,7 @@ class DSWSClient:
             return_symbol_names=True,
             return_field_names=True,
         )
-        responses = self.fetch_all(request_bundles)
+        responses = self.fetch_all(request_bundles, threaded=self._max_concurrency > 1)
         data_responses = itertools.chain.from_iterable(
             response.data_responses for response in responses
         )
@@ -109,7 +111,7 @@ class DSWSClient:
             return_symbol_names=True,
             return_field_names=True,
         )
-        responses = self.fetch_all(request_bundles)
+        responses = self.fetch_all(request_bundles, threaded=self._max_concurrency > 1)
         data_responses = itertools.chain.from_iterable(
             response.data_responses for response in responses
         )
@@ -130,6 +132,7 @@ class DSWSClient:
         Returns:
             A data response.
         """
+        logger.debug("fetching one")
         return self._execute_request(
             DSGetDataRequest(
                 token_value=self.token,
@@ -156,6 +159,7 @@ class DSWSClient:
         Returns:
             A data bundle response.
         """
+        logger.debug("fetching bundle")
         return self._execute_request(
             DSGetDataBundleRequest(
                 token_value=self.token,
@@ -170,10 +174,30 @@ class DSWSClient:
     def fetch_all(
         self,
         request_bundles: List[List[DSDataRequest]],
+        *,
+        threaded: bool = False,
     ) -> Iterator[DSGetDataBundleResponse]:
         """Fetch as many bundles as needed to get all items."""
-        for bundle in request_bundles:
-            yield self.fetch_bundle(bundle)
+        if threaded:
+            yield from self.fetch_all_threaded(request_bundles)
+        else:
+            for bundle in request_bundles:
+                yield self.fetch_bundle(bundle)
+
+    def fetch_all_threaded(
+        self,
+        request_bundles: List[List[DSDataRequest]],
+    ) -> Iterator[DSGetDataBundleResponse]:
+        """Fetch as many bundles as needed to get all items (concurrently)."""
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=self._max_concurrency
+        ) as executor:
+            logger.debug("fetching bundles in parallel")
+            futures = [
+                executor.submit(self.fetch_bundle, bundle) for bundle in request_bundles
+            ]
+            for future in concurrent.futures.as_completed(futures):
+                yield future.result()
 
     def fetch_token(self, **kwargs: object) -> Token:
         """
@@ -276,6 +300,7 @@ class DSWSClient:
         response_cls: Type[ResponseCls],
     ) -> ResponseCls:
         """Execute a request."""
+        logger.debug("executing request")
         if self._app_id is not None:
             request.properties.append(DSStringKVPair("__AppId", self._app_id))
         if self._data_source is not None:
