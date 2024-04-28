@@ -9,7 +9,7 @@ dependencies = [
   "setuptools; python_version >= \"3.12\"",
 ]
 name = "dsws-client"
-version = "0.2.4"
+version = "0.2.5"
 description = "Python client for the Datastream Web Service API (DSWS)"
 readme = "README.md"
 
