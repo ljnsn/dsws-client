@@ -3,7 +3,6 @@
 import itertools
 import logging
 import sys
-import urllib.parse
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
 import httpx
@@ -53,25 +52,17 @@ class DSWSClient:
         config = DSWSConfig(**kwargs)
         self._username = username
         self._password = password
-        self._url = urllib.parse.urljoin(config.base_url, config.path)
-        self._proxies = (
-            None
-            if config.proxy is None
-            else {"http": config.proxy, "https": config.proxy}
-        )
-        self._timeout = config.timeout
-        self._ssl_cert = config.ssl_cert
-        self._token: Optional[Token] = None
-        self._app_id = config.app_id
-        self._data_source = config.data_source
-        self._debug = config.debug
         self._session = httpx.Client(
             base_url=config.base_url,
             timeout=config.timeout,
-            proxies=self._proxies,
-            verify=self._ssl_cert or True,
+            proxies=config.proxies,  # type: ignore[arg-type]
+            verify=config.ssl_cert or True,
             headers={"Content-Type": "application/json"},
         )
+        self._app_id = config.app_id
+        self._data_source = config.data_source
+        self._debug = config.debug
+        self._token: Optional[Token] = None
 
     @property
     def token(self) -> str:
@@ -318,12 +309,11 @@ class DSWSClient:
             request.properties.append(DSStringKVPair("__AppId", self._app_id))
         if self._data_source is not None:
             request.properties.append(DSStringKVPair("Source", self._data_source))
-        request_url = urllib.parse.urljoin(self._url, request.path)
         request_data = msgspec.json.encode(request)
         if self._debug:
             sys.stdout.write(f"sending request: {request_data!s}")
         response = self._session.post(
-            request_url,
+            request.path,
             content=request_data,
         )
         if not response.is_success:
