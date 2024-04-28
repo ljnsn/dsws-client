@@ -41,7 +41,7 @@ name = "argcomplete"
 version = "3.3.0"
 requires_python = ">=3.8"
 summary = "Bash tab completion for argparse"
-groups = ["default", "dev"]
+groups = ["dev"]
 files = [
     {file = "argcomplete-3.3.0-py3-none-any.whl", hash = "sha256:c168c3723482c031df3c207d4ba8fa702717ccb9fc0bfe4117166c1f537b4a54"},
     {file = "argcomplete-3.3.0.tar.gz", hash = "sha256:fd03ff4a5b9e6580569d34b273f741e85cd9e072f3feeeee3eba4891c70eda62"},
@@ -108,7 +108,7 @@ name = "charset-normalizer"
 version = "3.3.2"
 requires_python = ">=3.7.0"
 summary = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
-groups = ["default", "dev"]
+groups = ["dev"]
 files = [
     {file = "charset-normalizer-3.3.2.tar.gz", hash = "sha256:f30c3cb33b24454a82faecaf01b19c18562b1e89558fb6c56de4d9118a032fd5"},
     {file = "charset_normalizer-3.3.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:25baf083bf6f6b341f4121c2f3c548875ee6f5339300e08be3f2b2ba1721cdd3"},
@@ -194,7 +194,7 @@ name = "colorama"
 version = "0.4.6"
 requires_python = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
 summary = "Cross-platform colored terminal text."
-groups = ["default", "dev"]
+groups = ["dev"]
 files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
@@ -205,7 +205,7 @@ name = "commitizen"
 version = "3.24.0"
 requires_python = ">=3.8"
 summary = "Python commitizen client tool"
-groups = ["default", "dev"]
+groups = ["dev"]
 dependencies = [
     "argcomplete<3.4,>=1.12.1",
     "charset-normalizer<4,>=2.1.0",
@@ -353,18 +353,18 @@ files = [
 
 [[package]]
 name = "cz-conventional-gitmoji"
-version = "0.3.0"
+version = "0.3.1"
 requires_python = "<4.0,>=3.7"
 summary = "A commitizen plugin that combines gitmoji and conventional."
 groups = ["dev"]
 dependencies = [
-    "attrs<24.0.0,>=23.1.0",
-    "commitizen<4.0.0,>=3.2.2",
+    "attrs>=23.1.0",
+    "commitizen>=3.2.2",
     "setuptools; python_version >= \"3.12\"",
 ]
 files = [
-    {file = "cz_conventional_gitmoji-0.3.0-py3-none-any.whl", hash = "sha256:2e6f5509b19605cb8a58983c4d8dbc0505b8bfd91b1d6870c47e2f7f76c79d89"},
-    {file = "cz_conventional_gitmoji-0.3.0.tar.gz", hash = "sha256:35429ab76168175dc14c29b1a4c00f1aa03e3a95d82af969f413cc4bd09d4ea0"},
+    {file = "cz_conventional_gitmoji-0.3.1-py3-none-any.whl", hash = "sha256:21977fcb23d16795d45028e10709a9c21136cf6ae4d45b2dbfee0218a266a2d3"},
+    {file = "cz_conventional_gitmoji-0.3.1.tar.gz", hash = "sha256:e2b381e6f5e4b28a46293a2d68202d0b851e415195eced14278843ea0eeeed74"},
 ]
 
 [[package]]
@@ -372,7 +372,7 @@ name = "decli"
 version = "0.6.1"
 requires_python = ">=3.7"
 summary = "Minimal, easy-to-use, declarative cli tool"
-groups = ["default", "dev"]
+groups = ["dev"]
 files = [
     {file = "decli-0.6.1-py3-none-any.whl", hash = "sha256:7815ac58617764e1a200d7cadac6315fcaacc24d727d182f9878dd6378ccf869"},
     {file = "decli-0.6.1.tar.gz", hash = "sha256:ed88ccb947701e8e5509b7945fda56e150e2ac74a69f25d47ac85ef30ab0c0f0"},
@@ -504,7 +504,7 @@ name = "importlib-metadata"
 version = "7.1.0"
 requires_python = ">=3.8"
 summary = "Read metadata from Python packages"
-groups = ["default", "dev"]
+groups = ["dev"]
 dependencies = [
     "zipp>=0.5",
 ]
@@ -569,7 +569,7 @@ name = "jinja2"
 version = "3.1.3"
 requires_python = ">=3.7"
 summary = "A very fast and expressive template engine."
-groups = ["default", "dev"]
+groups = ["dev"]
 dependencies = [
     "MarkupSafe>=2.0",
 ]
@@ -583,7 +583,7 @@ name = "markupsafe"
 version = "2.1.5"
 requires_python = ">=3.7"
 summary = "Safely add untrusted strings to HTML/XML markup."
-groups = ["default", "dev"]
+groups = ["dev"]
 files = [
     {file = "MarkupSafe-2.1.5-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:a17a92de5231666cfbe003f0e4b9b3a7ae3afb1ec2845aadc2bacc93ff85febc"},
     {file = "MarkupSafe-2.1.5-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:72b6be590cc35924b02c78ef34b467da4ba07e4e0f0454a2c5907f473fc50ce5"},
@@ -768,7 +768,7 @@ name = "packaging"
 version = "24.0"
 requires_python = ">=3.7"
 summary = "Core utilities for Python packages"
-groups = ["default", "dev"]
+groups = ["dev"]
 files = [
     {file = "packaging-24.0-py3-none-any.whl", hash = "sha256:2ddfb553fdf02fb784c234c7ba6ccc288296ceabec964ad2eae3777778130bc5"},
     {file = "packaging-24.0.tar.gz", hash = "sha256:eb82c5e3e56209074766e6885bb04b8c38a0c015d0a30036ebe7ece34c9989e9"},
@@ -854,7 +854,7 @@ name = "prompt-toolkit"
 version = "3.0.36"
 requires_python = ">=3.6.2"
 summary = "Library for building powerful interactive command lines in Python"
-groups = ["default", "dev"]
+groups = ["dev"]
 dependencies = [
     "wcwidth",
 ]
@@ -945,7 +945,7 @@ name = "pyyaml"
 version = "6.0.1"
 requires_python = ">=3.6"
 summary = "YAML parser and emitter for Python"
-groups = ["default", "dev"]
+groups = ["dev"]
 files = [
     {file = "PyYAML-6.0.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:d858aa552c999bc8a8d57426ed01e40bef403cd8ccdd0fc5f6f04a00414cac2a"},
     {file = "PyYAML-6.0.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:fd66fc5d0da6d9815ba2cebeb4205f95818ff4b79c3ebe268e75d961704af52f"},
@@ -993,7 +993,7 @@ name = "questionary"
 version = "2.0.1"
 requires_python = ">=3.8"
 summary = "Python library to build pretty command line user prompts ⭐️"
-groups = ["default", "dev"]
+groups = ["dev"]
 dependencies = [
     "prompt-toolkit<=3.0.36,>=2.0",
 ]
@@ -1081,7 +1081,7 @@ name = "termcolor"
 version = "2.4.0"
 requires_python = ">=3.8"
 summary = "ANSI color formatting for output in terminal"
-groups = ["default", "dev"]
+groups = ["dev"]
 files = [
     {file = "termcolor-2.4.0-py3-none-any.whl", hash = "sha256:9297c0df9c99445c2412e832e882a7884038a25617c60cea2ad69488d4040d63"},
     {file = "termcolor-2.4.0.tar.gz", hash = "sha256:aab9e56047c8ac41ed798fa36d892a37aca6b3e9159f3e0c24bc64a9b3ac7b7a"},
@@ -1104,7 +1104,7 @@ name = "tomlkit"
 version = "0.12.4"
 requires_python = ">=3.7"
 summary = "Style preserving TOML library"
-groups = ["default", "dev"]
+groups = ["dev"]
 files = [
     {file = "tomlkit-0.12.4-py3-none-any.whl", hash = "sha256:5cd82d48a3dd89dee1f9d64420aa20ae65cfbd00668d6f094d7578a78efbb77b"},
     {file = "tomlkit-0.12.4.tar.gz", hash = "sha256:7ca1cfc12232806517a8515047ba66a19369e71edf2439d0f5824f91032b6cc3"},
@@ -1177,7 +1177,7 @@ files = [
 name = "wcwidth"
 version = "0.2.13"
 summary = "Measures the displayed width of unicode strings in a terminal"
-groups = ["default", "dev"]
+groups = ["dev"]
 files = [
     {file = "wcwidth-0.2.13-py2.py3-none-any.whl", hash = "sha256:3da69048e4540d84af32131829ff948f1e022c1c6bdb8d6102117aac784f6859"},
     {file = "wcwidth-0.2.13.tar.gz", hash = "sha256:72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5"},
@@ -1188,7 +1188,7 @@ name = "zipp"
 version = "3.18.1"
 requires_python = ">=3.8"
 summary = "Backport of pathlib-compatible object wrapper for zip files"
-groups = ["default", "dev"]
+groups = ["dev"]
 files = [
     {file = "zipp-3.18.1-py3-none-any.whl", hash = "sha256:206f5a15f2af3dbaee80769fb7dc6f249695e940acca08dfb2a4769fe61e538b"},
     {file = "zipp-3.18.1.tar.gz", hash = "sha256:2884ed22e7d8961de1c9a05142eb69a247f120291bc0206a00a7642f09b5b715"},
