@@ -1,3 +1,22 @@
+## v0.2.4 (2024-04-28)
+
+### 🐛🚑️ Fixes
+
+- move commitizen to dev deps (#137)
+
+### 💚👷 CI & Build
+
+- use different token for dependabot checkout (#116)
+- add back tests on 3.12
+
+### 🔧🔨📦️ Configuration, Scripts, Packages
+
+- **ruff**: adapt to 0.2.0
+
+### 🚨 Linting
+
+- conform to new black standard
+
 ## v0.2.3 (2024-01-30)
 
 ### 🐛🚑️ Fixes
