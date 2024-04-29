@@ -121,7 +121,7 @@ class DSWSClient:
             return_symbol_names=True,
             return_field_names=True,
         )
-        responses = self.fetch_all(request_bundles)
+        responses = self.fetch_all(request_bundles, threaded=self._max_concurrency > 1)
         data_responses = itertools.chain.from_iterable(
             response.data_responses for response in responses
         )
@@ -168,7 +168,7 @@ class DSWSClient:
             return_symbol_names=True,
             return_field_names=True,
         )
-        responses = self.fetch_all(request_bundles)
+        responses = self.fetch_all(request_bundles, threaded=self._max_concurrency > 1)
         data_responses = itertools.chain.from_iterable(
             response.data_responses for response in responses
         )
@@ -231,15 +231,17 @@ class DSWSClient:
     def fetch_all(
         self,
         request_bundles: List[List[DSDataRequest]],
+        *,
+        threaded: bool = False,
     ) -> Iterator[DSGetDataBundleResponse]:
         """Fetch as many bundles as needed to get all items."""
-        if self._max_concurrency > 1:
-            yield from self._fetch_all_threaded(request_bundles)
+        if threaded:
+            yield from self.fetch_all_threaded(request_bundles)
         else:
             for bundle in request_bundles:
                 yield self.fetch_bundle(bundle)
 
-    def _fetch_all_threaded(
+    def fetch_all_threaded(
         self,
         request_bundles: List[List[DSDataRequest]],
     ) -> Iterator[DSGetDataBundleResponse]:
