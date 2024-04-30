@@ -1,3 +1,9 @@
+## v1.1.0 (2024-04-30)
+
+### ✨ Features
+
+- add methods to iterate over parsed responses (#145)
+
 ## v1.0.0 (2024-04-28)
 
 ### 🐛🚑️ Fixes
