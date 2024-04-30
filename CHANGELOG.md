@@ -1,3 +1,9 @@
+## v1.1.1 (2024-04-30)
+
+### 🐛🚑️ Fixes
+
+- add concurrent_requests arg (#146)
+
 ## v1.1.0 (2024-04-30)
 
 ### ✨ Features
