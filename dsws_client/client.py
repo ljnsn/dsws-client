@@ -125,7 +125,7 @@ class DSWSClient:
         data_responses = itertools.chain.from_iterable(
             response.data_responses for response in responses
         )
-        yield from responses_to_records(data_responses)
+        return responses_to_records(data_responses)
 
     def fetch_timeseries_data(  # noqa: PLR0913
         self,
@@ -172,7 +172,7 @@ class DSWSClient:
         data_responses = itertools.chain.from_iterable(
             response.data_responses for response in responses
         )
-        yield from responses_to_records(data_responses)
+        return responses_to_records(data_responses)
 
     def fetch_one(
         self,
