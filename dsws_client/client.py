@@ -30,7 +30,7 @@ from dsws_client.exceptions import (
     InvalidResponseError,
     RequestFailedError,
 )
-from dsws_client.parse import ParsedResponse, responses_to_records
+from dsws_client.parse import ParsedResponse, aggregate_responses, responses_to_records
 from dsws_client.value_objects import DateType, DSStringKVPair, Token
 
 logger = logging.getLogger(__name__)
@@ -94,6 +94,22 @@ class DSWSClient:
         tag: Optional[str] = None,
     ) -> ParsedResponse:
         """Fetch snapshot data."""
+        data_responses = self.fetch_snapshot_data_iter(
+            identifiers=identifiers,
+            fields=fields,
+            start=start,
+            tag=tag,
+        )
+        return aggregate_responses(data_responses)
+
+    def fetch_snapshot_data_iter(
+        self,
+        identifiers: List[str],
+        fields: List[str],
+        start: Optional[DateType] = None,
+        tag: Optional[str] = None,
+    ) -> Iterator[ParsedResponse]:
+        """Fetch snapshot data, returning an iterator over responses."""
         request_bundles = self.construct_request_bundles(
             identifiers=identifiers,
             fields=fields,
@@ -121,6 +137,26 @@ class DSWSClient:
         tag: Optional[str] = None,
     ) -> ParsedResponse:
         """Fetch timeseries data."""
+        data_responses = self.fetch_timeseries_data_iter(
+            identifiers=identifiers,
+            fields=fields,
+            start=start,
+            end=end,
+            frequency=frequency,
+            tag=tag,
+        )
+        return aggregate_responses(data_responses)
+
+    def fetch_timeseries_data_iter(  # noqa: PLR0913
+        self,
+        identifiers: List[str],
+        fields: List[str],
+        start: Optional[DateType] = None,
+        end: Optional[DateType] = None,
+        frequency: str = "D",
+        tag: Optional[str] = None,
+    ) -> Iterator[ParsedResponse]:
+        """Fetch timeseries data, returning an iterator over responses."""
         request_bundles = self.construct_request_bundles(
             identifiers=identifiers,
             fields=fields,

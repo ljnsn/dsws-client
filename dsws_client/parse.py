@@ -1,7 +1,7 @@
 import collections
 import datetime as dt
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, Union
 
 import msgspec
 
@@ -63,19 +63,25 @@ def responses_to_records(
     responses: Iterable[DSDataResponse],
     *,
     process_strings: bool = True,
-) -> ParsedResponse:
+) -> Iterator[ParsedResponse]:
     """Parse a list of DSDataResponse objects into a list of records."""
-    parsed_response = ParsedResponse()
     for response in responses:
         try:
-            _parsed_response = parse_response(response, process_strings=process_strings)
+            parsed_response = parse_response(response, process_strings=process_strings)
         except InvalidResponseError as exc:
             logger.warning("Invalid response, skipping")
             logger.debug(exc)
             continue
-        parsed_response.records.extend(_parsed_response.records)
-        parsed_response.errors.extend(_parsed_response.errors)
-        parsed_response.meta = parsed_response.meta.merge(_parsed_response.meta)
+        yield parsed_response
+
+
+def aggregate_responses(responses: Iterable[ParsedResponse]) -> ParsedResponse:
+    """Aggregate a list of parsed responses into a single response."""
+    parsed_response = ParsedResponse()
+    for response in responses:
+        parsed_response.records.extend(response.records)
+        parsed_response.errors.extend(response.errors)
+        parsed_response.meta = parsed_response.meta.merge(response.meta)
     return parsed_response
 
 
