@@ -86,12 +86,14 @@ class DSWSClient:
             self._token = self.fetch_token()
         return self._token.token_value
 
-    def fetch_snapshot_data(
+    def fetch_snapshot_data(  # noqa: PLR0913
         self,
         identifiers: List[str],
         fields: List[str],
         start: Optional[DateType] = None,
         tag: Optional[str] = None,
+        *,
+        concurrent_requests: bool = False,
     ) -> ParsedResponse:
         """Fetch snapshot data."""
         data_responses = self.fetch_snapshot_data_iter(
@@ -99,15 +101,18 @@ class DSWSClient:
             fields=fields,
             start=start,
             tag=tag,
+            concurrent_requests=concurrent_requests,
         )
         return aggregate_responses(data_responses)
 
-    def fetch_snapshot_data_iter(
+    def fetch_snapshot_data_iter(  # noqa: PLR0913
         self,
         identifiers: List[str],
         fields: List[str],
         start: Optional[DateType] = None,
         tag: Optional[str] = None,
+        *,
+        concurrent_requests: bool = False,
     ) -> Iterator[ParsedResponse]:
         """Fetch snapshot data, returning an iterator over responses."""
         request_bundles = self.construct_request_bundles(
@@ -121,7 +126,7 @@ class DSWSClient:
             return_symbol_names=True,
             return_field_names=True,
         )
-        responses = self.fetch_all(request_bundles)
+        responses = self.fetch_all(request_bundles, threaded=concurrent_requests)
         data_responses = itertools.chain.from_iterable(
             response.data_responses for response in responses
         )
@@ -135,6 +140,8 @@ class DSWSClient:
         end: Optional[DateType] = None,
         frequency: str = "D",
         tag: Optional[str] = None,
+        *,
+        concurrent_requests: bool = False,
     ) -> ParsedResponse:
         """Fetch timeseries data."""
         data_responses = self.fetch_timeseries_data_iter(
@@ -144,6 +151,7 @@ class DSWSClient:
             end=end,
             frequency=frequency,
             tag=tag,
+            concurrent_requests=concurrent_requests,
         )
         return aggregate_responses(data_responses)
 
@@ -155,6 +163,8 @@ class DSWSClient:
         end: Optional[DateType] = None,
         frequency: str = "D",
         tag: Optional[str] = None,
+        *,
+        concurrent_requests: bool = False,
     ) -> Iterator[ParsedResponse]:
         """Fetch timeseries data, returning an iterator over responses."""
         request_bundles = self.construct_request_bundles(
@@ -168,7 +178,7 @@ class DSWSClient:
             return_symbol_names=True,
             return_field_names=True,
         )
-        responses = self.fetch_all(request_bundles)
+        responses = self.fetch_all(request_bundles, threaded=concurrent_requests)
         data_responses = itertools.chain.from_iterable(
             response.data_responses for response in responses
         )
@@ -231,15 +241,17 @@ class DSWSClient:
     def fetch_all(
         self,
         request_bundles: List[List[DSDataRequest]],
+        *,
+        threaded: bool = False,
     ) -> Iterator[DSGetDataBundleResponse]:
         """Fetch as many bundles as needed to get all items."""
-        if self._max_concurrency > 1:
-            yield from self._fetch_all_threaded(request_bundles)
+        if threaded:
+            yield from self.fetch_all_threaded(request_bundles)
         else:
             for bundle in request_bundles:
                 yield self.fetch_bundle(bundle)
 
-    def _fetch_all_threaded(
+    def fetch_all_threaded(
         self,
         request_bundles: List[List[DSDataRequest]],
     ) -> Iterator[DSGetDataBundleResponse]:
