@@ -9,7 +9,7 @@ DateType = Union[dt.date, str]
 class DSStringKVPair(msgspec.Struct, rename="pascal", frozen=True):
     """A key-value pair."""
 
-    key: str
+    key: str | None
     value: Any
 
 

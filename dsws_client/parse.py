@@ -153,15 +153,18 @@ def parse_meta(response: DSDataResponse) -> Meta:
     meta = Meta()
     if response.data_type_names:
         meta.data_type_names = {
-            kv_pair.key: kv_pair.value for kv_pair in response.data_type_names
+            kv_pair.key or kv_pair.value: kv_pair.value
+            for kv_pair in response.data_type_names
         }
     if response.symbol_names:
         meta.symbol_names = {
-            kv_pair.key: kv_pair.value for kv_pair in response.symbol_names
+            kv_pair.key or kv_pair.value: kv_pair.value
+            for kv_pair in response.symbol_names
         }
     if response.additional_responses:
         meta.additional_responses = {
-            kv_pair.key: kv_pair.value for kv_pair in response.additional_responses
+            kv_pair.key or kv_pair.value: kv_pair.value
+            for kv_pair in response.additional_responses
         }
     if response.tag:
         meta.tags.append(response.tag)
