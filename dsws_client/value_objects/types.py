@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 import msgspec
 
@@ -9,7 +9,7 @@ DateType = Union[dt.date, str]
 class DSStringKVPair(msgspec.Struct, rename="pascal", frozen=True):
     """A key-value pair."""
 
-    key: str
+    key: Optional[str]
     value: Any
 
 
