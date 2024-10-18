@@ -3,6 +3,13 @@ name: Python package
 on:
   push:
     branches:
+      - "main"
+  pull_request:
+    branches:
+      - "**"
+    types: [opened, synchronize, reopened]
+  create:
+    branches:
       - "**"
 
 jobs:
@@ -16,25 +23,30 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+
       - uses: actions/cache@v4
         id: cache
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-root
-      - name: Install pdm
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install pdm>=2.15.0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
       - name: Install Dependencies
-        run: python -m pdm sync -d
+        run: uv sync --frozen --only-dev
+
       - name: Lint
-        run: python -m pdm run bash scripts/lint.sh
+        run: uv run bash scripts/lint.sh
+
       - name: Test
-        run: python -m pdm run bash scripts/test.sh
+        run: uv run bash scripts/test.sh
+
       - name: Upload coverage
         uses: codecov/codecov-action@v3
 
@@ -56,6 +68,7 @@ jobs:
           fetch-depth: 0
           token: ${{ github.token }}
           submodules: recursive
+
       - name: Checkout
         if: github.actor != 'dependabot[bot]'
         uses: actions/checkout@v4
@@ -63,6 +76,7 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           submodules: recursive
+
       - name: Create bump and changelog
         uses: commitizen-tools/commitizen-action@master
         with:

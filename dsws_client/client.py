@@ -86,7 +86,7 @@ class DSWSClient:
             self._token = self.fetch_token()
         return self._token.token_value
 
-    def fetch_snapshot_data(  # noqa: PLR0913
+    def fetch_snapshot_data(
         self,
         identifiers: List[str],
         fields: List[str],
@@ -105,7 +105,7 @@ class DSWSClient:
         )
         return aggregate_responses(data_responses)
 
-    def fetch_snapshot_data_iter(  # noqa: PLR0913
+    def fetch_snapshot_data_iter(
         self,
         identifiers: List[str],
         fields: List[str],

@@ -60,10 +60,10 @@ repos:
     hooks:
       - id: conventional-gitmoji
 
-  - repo: https://github.com/pdm-project/pdm
-    rev: 2.19.2
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.4.24
     hooks:
-      - id: pdm-lock-check
+      - id: uv-lock
 
   - repo: local
     hooks:
@@ -79,5 +79,11 @@ repos:
         name: Format with ruff
         entry: ruff format
         require_serial: true
+        language: system
+        types: [python]
+
+      - id: mypy
+        name: mypy
+        entry: mypy
         language: system
         types: [python]

@@ -3,6 +3,6 @@
 set -e
 set -x
 
-pdm run ruff check dsws_client tests
-pdm run ruff format --check dsws_client tests
-pdm run mypy dsws_client tests
+ruff check --exit-non-zero-on-fix dsws_client tests
+ruff format --check dsws_client tests
+mypy dsws_client tests
