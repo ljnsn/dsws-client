@@ -47,10 +47,6 @@ update_changelog_on_bump = true
 annotate_tags = true
 pre_bump_hooks = ["uv lock --upgrade-package dsws-client"]
 
-[tool.black]
-line-length = 88
-target-version = ["py38"]
-
 [tool.coverage.run]
 branch = true
 command_line = "--module pytest"
