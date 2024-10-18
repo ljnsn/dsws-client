@@ -230,7 +230,7 @@ testpaths = ["tests"]
 branch = true
 command_line = "--module pytest"
 data_file = "reports/.coverage"
-source = [""]
+source = ["dsws_client"]
 
 [tool.coverage.report]
 fail_under = 50
