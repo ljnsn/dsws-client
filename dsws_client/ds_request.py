@@ -41,8 +41,8 @@ class DSRequest(Protocol):
 
 
 _HINT_MAP = {
-    "L": DSStringKVPair(enums.DSInstrumentPropertyName.INSTRUMENT_LIST, True),
-    "E": DSStringKVPair(enums.DSInstrumentPropertyName.EXPRESSION, True),
+    "L": DSStringKVPair(enums.DSInstrumentPropertyName.INSTRUMENT_LIST, value=True),
+    "E": DSStringKVPair(enums.DSInstrumentPropertyName.EXPRESSION, value=True),
 }
 
 
@@ -78,14 +78,16 @@ class DSInstrument(msgspec.Struct, rename="pascal"):
     @classmethod
     def from_list(cls, instrument_list: List[str]) -> "DSInstrument":
         """Return an instrument from a list of instrument names."""
-        properties = [DSStringKVPair(enums.DSInstrumentPropertyName.SYMBOL_SET, True)]
+        properties = [
+            DSStringKVPair(enums.DSInstrumentPropertyName.SYMBOL_SET, value=True)
+        ]
         return cls(",".join(instrument_list), properties)
 
     @classmethod
     def construct(
         cls,
         identifiers: Union[str, List[str]],
-        return_names: bool = False,
+        return_names: bool = False,  # noqa: FBT001, FBT002
         properties: Optional[Dict[str, str]] = None,
     ) -> "DSInstrument":
         """Return an instrument."""
@@ -100,7 +102,7 @@ class DSInstrument(msgspec.Struct, rename="pascal"):
             instance = cls(value, hint_properties)
         if return_names:
             instance.properties.append(
-                DSStringKVPair(enums.DSInstrumentPropertyName.RETURN_NAME, True)
+                DSStringKVPair(enums.DSInstrumentPropertyName.RETURN_NAME, value=True)
             )
         properties = properties or {}
         for key, value in properties.items():
@@ -118,13 +120,13 @@ class DSDataType(msgspec.Struct, rename="pascal"):
     def construct(
         cls,
         field: str,
-        return_name: bool = False,
+        return_name: bool = False,  # noqa: FBT001, FBT002
         properties: Optional[Dict[str, str]] = None,
     ) -> "DSDataType":
         """Construct a data type."""
         instance = cls(field)
         if return_name:
-            instance.properties.append(DSStringKVPair("ReturnName", True))
+            instance.properties.append(DSStringKVPair("ReturnName", value=True))
         properties = properties or {}
         for key, value in properties.items():
             instance.properties.append(DSStringKVPair(key, value))

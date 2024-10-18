@@ -1,0 +1,25 @@
+# Changes here will be overwritten by Copier
+_commit: v0.0.6
+_src_path: git@github.com:ljnsn/copier-python-poly.git
+author_email: info@ljnsn.com
+author_name: ljnsn
+ci: true
+ci_provider: github
+commitizen: true
+coverage: true
+cz_gitmoji: true
+description: Python client for the Datastream Web Service API (DSWS)
+license: MIT
+loguru: false
+maximum_python_version: '4.0'
+minimum_python_version: '3.8'
+mypy: true
+package_manager: uv
+pre_commit: true
+project_name: dsws-client
+project_snake: dsws_client
+pytest: true
+ruff: true
+sqlalchemy: false
+structure: simple
+web_app: false
