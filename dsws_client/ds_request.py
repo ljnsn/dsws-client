@@ -65,6 +65,10 @@ class DSInstrument(msgspec.Struct, rename="pascal"):
     value: str
     properties: List[DSStringKVPair] = msgspec.field(default_factory=list)
 
+    def __len__(self) -> int:
+        """Return the number of identifiers."""
+        return len(self.identifiers)
+
     @property
     def identifiers(self) -> List[str]:
         """Return the identifiers."""
