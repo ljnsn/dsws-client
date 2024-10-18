@@ -181,6 +181,8 @@ unfixable = ["ERA001", "F401", "F841"]
   "INP001",
   # usage of `assert` in tests
   "S101",
+  # standard pseudo-random generators are not suitable for cryptographic purposes
+  "S311",
   # magic value used in comarison
   "PLR2004",
   # private member accessed

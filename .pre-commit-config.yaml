@@ -97,5 +97,3 @@ repos:
         entry: mypy
         language: system
         types: [python]
-        pass_filenames: false
-        files: \.py$

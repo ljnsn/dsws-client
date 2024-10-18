@@ -146,7 +146,7 @@ def test_bundle_validation(token: str) -> None:
         (
             ["IBM", "MSFT"],
             ["IBM", "MSFT"],
-            [DSStringKVPair(DSInstrumentPropertyName.SYMBOL_SET, True)],
+            [DSStringKVPair(DSInstrumentPropertyName.SYMBOL_SET, value=True)],
         ),
         # TODO: fix expression splitting
         # (
@@ -157,7 +157,7 @@ def test_bundle_validation(token: str) -> None:
         (
             "LS&PCOMP|L",
             ["LS&PCOMP"],
-            [DSStringKVPair(DSInstrumentPropertyName.INSTRUMENT_LIST, True)],
+            [DSStringKVPair(DSInstrumentPropertyName.INSTRUMENT_LIST, value=True)],
         ),
     ],
 )
@@ -177,5 +177,5 @@ def test_construct_instrument(
 
     assert instrument.properties == [
         *expected_properties,
-        DSStringKVPair(DSInstrumentPropertyName.RETURN_NAME, True),
+        DSStringKVPair(DSInstrumentPropertyName.RETURN_NAME, value=True),
     ]
