@@ -1,10 +1,8 @@
-# https://pre-commit.com
-default_language_version:
-  python: python3
 default_install_hook_types: [commit-msg, pre-commit]
-default_stages: [commit, manual]
+default_stages: [pre-commit, manual]
 fail_fast: true
 minimum_pre_commit_version: "1.4.3"
+
 repos:
   - repo: meta
     hooks:
@@ -13,11 +11,7 @@ repos:
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
-      - id: python-check-blanket-noqa
-      - id: python-check-blanket-type-ignore
       - id: python-check-mock-methods
-      - id: python-no-eval
-      - id: python-no-log-warn
       - id: text-unicode-replacement-char
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -27,10 +21,10 @@ repos:
       - id: check-ast
       - id: check-builtin-literals
       - id: check-case-conflict
-      - id: check-docstring-first
       - id: check-executables-have-shebangs
       - id: check-json
       - id: check-merge-conflict
+        args: [--assume-in-merge]
       - id: check-shebang-scripts-are-executable
       - id: check-symlinks
       - id: check-toml
@@ -44,10 +38,19 @@ repos:
         types: [python]
       - id: fix-byte-order-marker
       - id: mixed-line-ending
-      - id: name-tests-test
-        args: [--pytest-test-first]
       - id: trailing-whitespace
         types: [python]
+
+  # change to use yamlfix or prettier
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.14.0
+    hooks:
+      - id: pretty-format-yaml
+        args:
+          - --autofix
+          - --preserve-quotes
+          - --indent=2
+          - --offset=2
 
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v3.29.1
@@ -61,12 +64,19 @@ repos:
       - id: conventional-gitmoji
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.4.24
+    rev: 0.4.19
     hooks:
       - id: uv-lock
 
   - repo: local
     hooks:
+      # Prevent committing .rej files
+      - id: forbidden-files
+        name: forbidden files
+        entry: found Copier update rejection files; review and remove them before merging.
+        language: fail
+        files: "\\.rej$"
+
       - id: ruff
         name: Fix with ruff
         entry: ruff check
@@ -83,7 +93,9 @@ repos:
         types: [python]
 
       - id: mypy
-        name: mypy
+        name: Validate types with mypy
         entry: mypy
         language: system
         types: [python]
+        pass_filenames: false
+        files: \.py$
