@@ -11,7 +11,7 @@ repos:
       - id: check-useless-excludes
 
   - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: v1.9.0
+    rev: v1.10.0
     hooks:
       - id: python-check-blanket-noqa
       - id: python-check-blanket-type-ignore
@@ -21,7 +21,7 @@ repos:
       - id: text-unicode-replacement-char
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v5.0.0
     hooks:
       - id: check-added-large-files
       - id: check-ast
@@ -50,18 +50,18 @@ repos:
         types: [python]
 
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.13.0
+    rev: v3.29.1
     hooks:
       - id: commitizen
         additional_dependencies: [cz-conventional-gitmoji]
 
   - repo: https://github.com/ljnsn/cz-conventional-gitmoji
-    rev: v0.2.0
+    rev: v0.6.1
     hooks:
       - id: conventional-gitmoji
 
   - repo: https://github.com/pdm-project/pdm
-    rev: 2.11.1
+    rev: 2.19.2
     hooks:
       - id: pdm-lock-check
 
