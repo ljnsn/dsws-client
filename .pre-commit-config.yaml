@@ -60,10 +60,10 @@ repos:
     hooks:
       - id: conventional-gitmoji
 
-  - repo: https://github.com/pdm-project/pdm
-    rev: 2.19.2
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.3.3
     hooks:
-      - id: pdm-lock-check
+      - id: uv-lock
 
   - repo: local
     hooks:
