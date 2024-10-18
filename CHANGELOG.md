@@ -1,3 +1,17 @@
+## v1.1.3 (2024-10-18)
+
+### 🐛🚑️ Fixes
+
+- add ds instrument len
+
+### 📌➕⬇️➖⬆️ Dependencies
+
+- all
+
+### 🔧🔨📦️ Configuration, Scripts, Packages
+
+- **pre-commit**: autoupdate
+
 ## v1.1.2 (2024-05-02)
 
 ### 🐛🚑️ Fixes
