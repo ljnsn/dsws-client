@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
-pdm publish
+set -e
+set -x
+
+uv build
+uv publish

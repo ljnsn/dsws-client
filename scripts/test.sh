@@ -3,6 +3,6 @@
 set -e
 set -x
 
-pdm run coverage run
-pdm run coverage report
-pdm run coverage xml
+coverage run
+coverage report
+coverage xml
