@@ -165,7 +165,7 @@ convention = "google"
 ban-relative-imports = "all"
 
 [tool.ruff.lint.pep8-naming]
-classmethod-decorators = ["classmethod", "pydantic.validator"]
+classmethod-decorators = ["classmethod"]
 
 [tool.pytest.ini_options]
 addopts = """--color=yes --doctest-modules --exitfirst --failed-first \
