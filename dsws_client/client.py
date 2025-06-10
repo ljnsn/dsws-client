@@ -372,10 +372,7 @@ class DSWSClient:
         request_data = msgspec.json.encode(request)
         if self._debug:
             sys.stdout.write(f"sending request: {request_data!s}")
-        response = self._session.post(
-            request.path,
-            content=request_data,
-        )
+        response = self._session.post(request.path, content=request_data)
         if not response.is_success:
             msg = f"request failed: {response.text}"
             raise RequestFailedError(msg, response.status_code)
