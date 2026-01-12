@@ -1,17 +1,14 @@
 """DSWS value objects."""
 
 __all__ = (
-    # objects
-    "DSStringKVPair",
-    "Token",
-    # enums
     "DSDateFrequencyName",
     "DSDateKind",
     "DSDateName",
     "DSInstrumentPropertyName",
+    "DSStringKVPair",
     "DSSymbolResponseValueType",
-    # type aliases
     "DateType",
+    "Token",
 )
 
 from dsws_client.value_objects.enums import (
