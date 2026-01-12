@@ -64,7 +64,6 @@ indent-style = "space"
 logger-objects = ["loguru"]
 select = [
   "A",
-  "ANN",
   "ARG",
   "B",
   "BLE",
@@ -108,10 +107,6 @@ ignore = [
   "D212",
   # Class attribute `id` is shadowing a python builtin
   "A003",
-  # Missing type annotation for `self` in method
-  "ANN101",
-  # Missing type annotation for `cls` in classmethod
-  "ANN102",
   # Dynamically typed expressions (typing.Any) are disallowed in `*args`
   "ANN401",
   # Exception must not use a string literal, assign to variable first
@@ -125,11 +120,11 @@ ignore = [
   # Avoid specifying long messages outside the exception class
   "TRY003",
   # Move application import into a type-checking block
-  "TCH001",
+  "TC001",
   # Move third-party import into a type-checking block
-  "TCH002",
+  "TC002",
   # Move standard library import into a type-checking block
-  "TCH003",
+  "TC003",
   # Invalid TODO tag
   "TD001",
   # Line contains FIXME, consider resolving the issue
