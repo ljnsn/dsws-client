@@ -69,7 +69,7 @@ class DSWSClient:
         self._session = httpx.Client(
             base_url=config.base_url,
             timeout=config.timeout,
-            proxies=config.proxies,  # type: ignore[arg-type]
+            proxy=None if config.proxy is None else httpx.Proxy(config.proxy),
             verify=config.ssl_cert or True,
             headers={"Content-Type": "application/json"},
         )
