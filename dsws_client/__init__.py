@@ -1,9 +1,9 @@
 """The Datastream Web Service API client package."""
 
 __all__ = (
-    "__version__",
     "DSWSClient",
     "DSWSConfig",
+    "__version__",
     "parse_response",
 )
 
