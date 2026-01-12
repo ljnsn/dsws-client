@@ -1,9 +1,8 @@
 import os
 import urllib.parse
-from typing import Any, ClassVar, Dict, Optional
+from typing import Any, ClassVar, Optional
 
 import attrs
-import httpx
 from dotenv import load_dotenv
 
 from dsws_client.version import __version__
@@ -38,9 +37,3 @@ class DSWSConfig:
     def base_url(self) -> str:
         """Return the base URL."""
         return urllib.parse.urljoin(self.host, self.path)
-
-    @property
-    def proxies(self) -> Optional[Dict[str, httpx.HTTPTransport]]:
-        """Return the proxies."""
-        proxy = httpx.HTTPTransport(proxy=self.proxy)
-        return {"https://": proxy, "http://": proxy} if self.proxy else None
