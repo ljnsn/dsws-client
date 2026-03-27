@@ -48,7 +48,7 @@ jobs:
         run: uv run bash scripts/test.sh
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
 
   bump-version:
     runs-on: ubuntu-latest
