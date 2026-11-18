@@ -81,4 +81,4 @@ jobs:
         uses: commitizen-tools/commitizen-action@master
         with:
           github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          extra_requirements: "cz-conventional-gitmoji"
+          extra_requirements: "cz-conventional-gitmoji uv"
