@@ -1,10 +1,10 @@
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
 
 @pytest.fixture
-def timeseries_response() -> Dict[str, Any]:
+def timeseries_response() -> dict[str, Any]:
     """Return an example timeseries response."""
     return {
         "AdditionalResponses": [{"Key": "Frequency", "Value": "D"}],
@@ -36,7 +36,7 @@ def timeseries_response() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def snapshot_response() -> Dict[str, Any]:
+def snapshot_response() -> dict[str, Any]:
     """Return an example snapshot response."""
     return {
         "AdditionalResponses": None,
@@ -90,7 +90,7 @@ def snapshot_response() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def invalid_response(timeseries_response: Dict[str, Any]) -> Dict[str, Any]:
+def invalid_response(timeseries_response: dict[str, Any]) -> dict[str, Any]:
     """Return a response with missing dates."""
     response = timeseries_response.copy()
     response["Dates"] = []

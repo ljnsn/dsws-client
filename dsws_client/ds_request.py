@@ -1,27 +1,17 @@
 """DSWS requests."""
 
 import datetime as dt
-import sys
 from typing import (
+    Annotated,
     Any,
     ClassVar,
-    Dict,
-    List,
-    Optional,
     Protocol,
-    Tuple,
     TypeVar,
-    Union,
 )
 
 import msgspec
 
 from dsws_client.value_objects import DSStringKVPair, enums
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
 
 # request limits
 MAX_INSTRUMENTS_PER_REQUEST = 50
@@ -37,7 +27,7 @@ class DSRequest(Protocol):
     """A DSWS request."""
 
     path: ClassVar[str]
-    properties: List[DSStringKVPair]
+    properties: list[DSStringKVPair]
 
 
 _HINT_MAP = {
@@ -52,7 +42,7 @@ class DSGetTokenRequest(msgspec.Struct, rename="pascal"):
     path: ClassVar[str] = "GetToken"
     user_name: str
     password: str
-    properties: List[DSStringKVPair] = msgspec.field(default_factory=list)
+    properties: list[DSStringKVPair] = msgspec.field(default_factory=list)
 
     def add_property(self, key: str, value: str) -> None:
         """Add a property to the request."""
@@ -63,20 +53,20 @@ class DSInstrument(msgspec.Struct, rename="pascal"):
     """Object that defines an instrument."""
 
     value: str
-    properties: List[DSStringKVPair] = msgspec.field(default_factory=list)
+    properties: list[DSStringKVPair] = msgspec.field(default_factory=list)
 
     def __len__(self) -> int:
         """Return the number of identifiers."""
         return len(self.identifiers)
 
     @property
-    def identifiers(self) -> List[str]:
+    def identifiers(self) -> list[str]:
         """Return the identifiers."""
         # TODO: this breaks for expressions
         return self.value.split(",")
 
     @classmethod
-    def from_list(cls, instrument_list: List[str]) -> "DSInstrument":
+    def from_list(cls, instrument_list: list[str]) -> "DSInstrument":
         """Return an instrument from a list of instrument names."""
         properties = [
             DSStringKVPair(enums.DSInstrumentPropertyName.SYMBOL_SET, value=True)
@@ -86,9 +76,9 @@ class DSInstrument(msgspec.Struct, rename="pascal"):
     @classmethod
     def construct(
         cls,
-        identifiers: Union[str, List[str]],
+        identifiers: str | list[str],
         return_names: bool = False,  # noqa: FBT001, FBT002
-        properties: Optional[Dict[str, str]] = None,
+        properties: dict[str, str] | None = None,
     ) -> "DSInstrument":
         """Return an instrument."""
         if isinstance(identifiers, list):
@@ -114,14 +104,14 @@ class DSDataType(msgspec.Struct, rename="pascal"):
     """A data type (field)."""
 
     value: str
-    properties: List[DSStringKVPair] = msgspec.field(default_factory=list)
+    properties: list[DSStringKVPair] = msgspec.field(default_factory=list)
 
     @classmethod
     def construct(
         cls,
         field: str,
         return_name: bool = False,  # noqa: FBT001, FBT002
-        properties: Optional[Dict[str, str]] = None,
+        properties: dict[str, str] | None = None,
     ) -> "DSDataType":
         """Construct a data type."""
         instance = cls(field)
@@ -138,15 +128,15 @@ class DSDate(msgspec.Struct, rename="pascal"):
 
     start: str
     end: str
-    frequency: Optional[enums.DSDateFrequencyName]
+    frequency: enums.DSDateFrequencyName | None
     kind: enums.DSDateKind
 
     @classmethod
     def construct(
         cls,
-        start: Optional[Union[str, dt.date, enums.DSDateName]],
-        end: Optional[Union[str, dt.date, enums.DSDateName]],
-        frequency: Optional[str],
+        start: str | dt.date | enums.DSDateName | None,
+        end: str | dt.date | enums.DSDateName | None,
+        frequency: str | None,
         kind: int,
     ) -> "DSDate":
         """Construct a date."""
@@ -160,7 +150,7 @@ class DSDate(msgspec.Struct, rename="pascal"):
     @classmethod
     def _convert_date(
         cls,
-        date: Optional[Union[str, dt.date, enums.DSDateName]],
+        date: str | dt.date | enums.DSDateName | None,
     ) -> str:
         """Convert a date to a string."""
         if date is None:
@@ -176,9 +166,9 @@ class DSDataRequest(msgspec.Struct, rename="pascal"):
     """Object that defines a data request."""
 
     instrument: DSInstrument
-    data_types: Annotated[List[DSDataType], msgspec.Meta(min_length=1)]
+    data_types: Annotated[list[DSDataType], msgspec.Meta(min_length=1)]
     date: DSDate
-    tag: Optional[str] = None
+    tag: str | None = None
 
     def __post_init__(self) -> None:
         """Validate that a request complies with DSWS request limits."""
@@ -204,7 +194,7 @@ class DSGetDataRequest(msgspec.Struct, rename="pascal"):
     path: ClassVar[str] = "GetData"
     token_value: str
     data_request: DSDataRequest
-    properties: List[DSStringKVPair] = msgspec.field(default_factory=list)
+    properties: list[DSStringKVPair] = msgspec.field(default_factory=list)
 
     def add_property(self, key: str, value: str) -> None:
         """Add a property to the request."""
@@ -216,8 +206,8 @@ class DSGetDataBundleRequest(msgspec.Struct, rename="pascal"):
 
     path: ClassVar[str] = "GetDataBundle"
     token_value: str
-    data_requests: Annotated[List[DSDataRequest], msgspec.Meta(min_length=1)]
-    properties: List[DSStringKVPair] = msgspec.field(default_factory=list)
+    data_requests: Annotated[list[DSDataRequest], msgspec.Meta(min_length=1)]
+    properties: list[DSStringKVPair] = msgspec.field(default_factory=list)
 
     def __post_init__(self) -> None:
         """Validate that a bundle complies with DSWS bundle limits."""
@@ -255,7 +245,7 @@ def evolve(instance: T, **changes: object) -> T:
 def bundle_identifiers(
     instrument: DSInstrument,
     n_fields: int,
-) -> List[Tuple[DSInstrument, ...]]:
+) -> list[tuple[DSInstrument, ...]]:
     """
     Make a list of bundles of identifiers.
 
@@ -288,7 +278,7 @@ def bundle_identifiers(
 def split_bundle_identifiers(
     bundle_instrument: DSInstrument,
     n_fields: int,
-) -> Tuple[DSInstrument, ...]:
+) -> tuple[DSInstrument, ...]:
     """
     Split identifiers per bundle identifiers per bundle request.
 

@@ -1,9 +1,8 @@
 import datetime as dt
 import re
-from typing import Union
 
 
-def convert_date(date_str: Union[str, dt.datetime]) -> dt.datetime:
+def convert_date(date_str: str | dt.datetime) -> dt.datetime:
     """Convert a timestamp from Datastream to datetime."""
     if isinstance(date_str, dt.datetime):
         return date_str

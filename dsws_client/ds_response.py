@@ -1,8 +1,7 @@
 """DSWS responses."""
 
 import datetime as dt
-import sys
-from typing import Any, List, Optional, Union
+from typing import Annotated, Any
 
 import msgspec
 
@@ -12,11 +11,6 @@ from dsws_client.value_objects import (
     Token,
     enums,
 )
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
 
 BOOL_MAPPING = {
     "Y": True,
@@ -37,7 +31,7 @@ class _DSSymbolResponseValue(msgspec.Struct, rename="pascal", tag_field="Type"):
     """A symbol response value."""
 
     symbol: str
-    currency: Optional[str]
+    currency: str | None
     value: Any
 
     def parse(self) -> Any:
@@ -120,7 +114,7 @@ class DSBoolArray(
 
     value: str
 
-    def parse(self) -> List[bool]:
+    def parse(self) -> list[bool]:
         """Parse the value."""
         return [BOOL_MAPPING[item] for item in self.value]
 
@@ -131,7 +125,7 @@ class DSIntArray(
 ):
     """An integer array response value."""
 
-    value: List[int]
+    value: list[int]
 
 
 class DSDateTimeArray(
@@ -140,9 +134,9 @@ class DSDateTimeArray(
 ):
     """A date/time array response value."""
 
-    value: List[DSDateString]
+    value: list[DSDateString]
 
-    def parse(self) -> List[dt.datetime]:
+    def parse(self) -> list[dt.datetime]:
         """Parse the value."""
         return [converters.convert_date(date_str) for date_str in self.value]
 
@@ -153,7 +147,7 @@ class DSDoubleArray(
 ):
     """A double array response value."""
 
-    value: List[float]
+    value: list[float]
 
 
 class DSStringArray(
@@ -162,7 +156,7 @@ class DSStringArray(
 ):
     """A string array response value."""
 
-    value: List[str]
+    value: list[str]
 
 
 class DSObjectArray(
@@ -171,44 +165,44 @@ class DSObjectArray(
 ):
     """An object array response value."""
 
-    value: List[Any]
+    value: list[Any]
 
 
-DSSymbolResponseValue = Union[
-    DSError,
-    DSEmpty,
-    DSBool,
-    DSInt,
-    DSDateTime,
-    DSDouble,
-    DSString,
-    DSBoolArray,
-    DSIntArray,
-    DSDateTimeArray,
-    DSDoubleArray,
-    DSStringArray,
-    DSObjectArray,
-]
+DSSymbolResponseValue = (
+    DSError
+    | DSEmpty
+    | DSBool
+    | DSInt
+    | DSDateTime
+    | DSDouble
+    | DSString
+    | DSBoolArray
+    | DSIntArray
+    | DSDateTimeArray
+    | DSDoubleArray
+    | DSStringArray
+    | DSObjectArray
+)
 
 
 class DSDataTypeResponseValue(msgspec.Struct, rename="pascal"):
     """A data type response value."""
 
     data_type: str
-    symbol_values: List[DSSymbolResponseValue]
+    symbol_values: list[DSSymbolResponseValue]
 
 
 class DSDataResponse(msgspec.Struct, rename="pascal"):
     """Object that contains a data response."""
 
-    data_type_values: List[DSDataTypeResponseValue]
-    dates: Optional[List[DSDateString]]
-    data_type_names: Optional[List[DSStringKVPair]]
-    symbol_names: Optional[List[DSStringKVPair]]
-    additional_responses: Optional[List[DSStringKVPair]]
-    tag: Optional[str]
+    data_type_values: list[DSDataTypeResponseValue]
+    dates: list[DSDateString] | None
+    data_type_names: list[DSStringKVPair] | None
+    symbol_names: list[DSStringKVPair] | None
+    additional_responses: list[DSStringKVPair] | None
+    tag: str | None
 
-    def pydates(self) -> Optional[List[dt.datetime]]:
+    def pydates(self) -> list[dt.datetime] | None:
         """Return response dates as python dates."""
         if self.dates is None:
             return None
@@ -219,14 +213,14 @@ class DSGetDataResponse(msgspec.Struct, rename="pascal"):
     """Object that containes a get data response."""
 
     data_response: DSDataResponse
-    properties: Optional[List[DSStringKVPair]] = None
+    properties: list[DSStringKVPair] | None = None
 
 
 class DSGetDataBundleResponse(msgspec.Struct, rename="pascal"):
     """Object that contains a get data bundle response."""
 
-    data_responses: List[DSDataResponse]
-    properties: Optional[List[DSStringKVPair]] = None
+    data_responses: list[DSDataResponse]
+    properties: list[DSStringKVPair] | None = None
 
 
 class DSGetTokenResponse(msgspec.Struct, rename="pascal"):
@@ -234,7 +228,7 @@ class DSGetTokenResponse(msgspec.Struct, rename="pascal"):
 
     token_value: str
     token_expiry: DSDateString
-    properties: Optional[List[DSStringKVPair]]
+    properties: list[DSStringKVPair] | None
 
     def to_token(self) -> Token:
         """Convert to a token."""

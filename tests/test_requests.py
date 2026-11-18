@@ -1,6 +1,5 @@
 import datetime as dt
 import random
-from typing import List, Optional, Type, Union
 
 import pytest
 from dsws_client.ds_request import (
@@ -27,7 +26,7 @@ def token_fix() -> str:
 
 
 def make_snapshot_date(
-    date: Union[str, dt.date, DSDateName] = dt.date(2018, 1, 1),
+    date: str | dt.date | DSDateName = dt.date(2018, 1, 1),
 ) -> DSDate:
     """Return a snapshot date."""
     return DSDate.construct(
@@ -39,8 +38,8 @@ def make_snapshot_date(
 
 
 def make_timeseries_date(
-    start: Union[str, dt.date, DSDateName] = dt.date(2018, 1, 1),
-    end: Union[str, dt.date, DSDateName] = dt.date(2018, 1, 1),
+    start: str | dt.date | DSDateName = dt.date(2018, 1, 1),
+    end: str | dt.date | DSDateName = dt.date(2018, 1, 1),
     frequency: str = "D",
 ) -> DSDate:
     """Return a fixed timeseries date."""
@@ -69,9 +68,9 @@ def data_request_fix(snapshot_date: DSDate) -> DSDataRequest:
 
 def make_data_request(
     date: DSDate,
-    instrument: Optional[DSInstrument] = None,
-    data_types: Optional[List[DSDataType]] = None,
-    tag: Optional[str] = None,
+    instrument: DSInstrument | None = None,
+    data_types: list[DSDataType] | None = None,
+    tag: str | None = None,
 ) -> DSDataRequest:
     """Generate a data request."""
     if instrument is None:
@@ -116,8 +115,8 @@ def test_request_instantiation(date: DSDate) -> None:
 )
 def test_request_validation(
     instrument: DSInstrument,
-    data_types: List[DSDataType],
-    expected: Type[Exception],
+    data_types: list[DSDataType],
+    expected: type[Exception],
 ) -> None:
     """Verify that requests are validated properly."""
     with pytest.raises(expected):
@@ -162,9 +161,9 @@ def test_bundle_validation(token: str) -> None:
     ],
 )
 def test_construct_instrument(
-    identifiers: Union[str, List[str]],
-    expected: List[str],
-    expected_properties: List[DSStringKVPair],
+    identifiers: str | list[str],
+    expected: list[str],
+    expected_properties: list[DSStringKVPair],
 ) -> None:
     """Verify instrument is constructed properly."""
     instrument = DSInstrument.construct(identifiers)
