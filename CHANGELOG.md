@@ -1,3 +1,56 @@
+## v1.1.4 (2026-11-18)
+
+### 🐛🚑️ Fixes
+
+- switch to httpx2
+- require at least python3.10
+
+### build
+
+- **deps**: bump astral-sh/setup-uv from 3 to 4 (#152)
+- **deps**: bump codecov/codecov-action from 3 to 5 (#151)
+
+### 💚👷 CI & Build
+
+- add uv extra requirement
+- **deps**: bump actions/setup-python from 6 to 7
+- **deps**: bump actions/cache from 5 to 6
+- **deps**: bump actions/checkout from 6 to 7
+- **deps**: bump codecov/codecov-action from 6 to 7
+- **deps**: bump codecov/codecov-action from 5 to 6
+- fix publish workflow
+- add python 3.13 and 3.14 to test matrix
+- **deps**: bump actions/checkout from 5 to 6 (#159)
+- **deps**: bump actions/cache from 4 to 5 (#160)
+- **deps**: bump astral-sh/setup-uv from 5 to 7 (#158)
+- **deps**: bump actions/setup-python from 5 to 6 (#157)
+- **deps**: bump actions/checkout from 4 to 5 (#156)
+- **dependabot**: add message (#154)
+
+### 🔧🔨📦️ Configuration, Scripts, Packages
+
+- switch to uv build backend
+- **uv**: move to new `dependency-groups`
+- **ruff**: remove and rename deprecated rules
+- switch to uv (#149)
+
+### 🙈 Ignore
+
+- ignore local mise
+
+### 🚨 Linting
+
+- sort imports
+
+### 🧑‍💻 Developer Experience
+
+- add copier template (#150)
+
+### 🧹 chore
+
+- bump all deps
+- ignore local configs
+
 ## v1.1.3 (2024-10-18)
 
 ### 🐛🚑️ Fixes
