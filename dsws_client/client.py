@@ -6,7 +6,7 @@ import logging
 import sys
 from typing import Any, Dict, Iterator, List, Optional, Type, TypeVar, Union
 
-import httpx
+import httpx2
 import msgspec
 
 from dsws_client.config import DSWSConfig
@@ -66,10 +66,10 @@ class DSWSClient:
         config = DSWSConfig(**kwargs)
         self._username = username
         self._password = password
-        self._session = httpx.Client(
+        self._session = httpx2.Client(
             base_url=config.base_url,
             timeout=config.timeout,
-            proxy=None if config.proxy is None else httpx.Proxy(config.proxy),
+            proxy=None if config.proxy is None else httpx2.Proxy(config.proxy),
             verify=config.ssl_cert or True,
             headers={"Content-Type": "application/json"},
         )
