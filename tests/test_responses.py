@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 import msgspec
 import pytest
@@ -11,7 +11,7 @@ from dsws_client.ds_response import (
 
 
 @pytest.fixture(name="token_response_dict")
-def token_response_fix() -> Dict[str, Any]:
+def token_response_fix() -> dict[str, Any]:
     """Return an example token response."""
     return {
         "Properties": None,
@@ -20,7 +20,7 @@ def token_response_fix() -> Dict[str, Any]:
     }
 
 
-def test_token_response(token_response_dict: Dict[str, Any]) -> None:
+def test_token_response(token_response_dict: dict[str, Any]) -> None:
     """Verify responses can be initialized with field aliases."""
     token_response = msgspec.convert(
         token_response_dict,
@@ -32,7 +32,7 @@ def test_token_response(token_response_dict: Dict[str, Any]) -> None:
     assert token_response.properties == token_response_dict["Properties"]
 
 
-def test_init_get_data_response(timeseries_response: Dict[str, Any]) -> None:
+def test_init_get_data_response(timeseries_response: dict[str, Any]) -> None:
     """Verify responses can be initialized with field aliases."""
     response = msgspec.convert(
         {"DataResponse": timeseries_response},
@@ -45,7 +45,7 @@ def test_init_get_data_response(timeseries_response: Dict[str, Any]) -> None:
     )
 
 
-def test_init_get_data_bundle_response(timeseries_response: Dict[str, Any]) -> None:
+def test_init_get_data_bundle_response(timeseries_response: dict[str, Any]) -> None:
     """Verify responses can be initialized with field aliases."""
     response = msgspec.convert(
         {"DataResponses": [timeseries_response]},

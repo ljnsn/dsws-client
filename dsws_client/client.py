@@ -4,7 +4,8 @@ import concurrent.futures
 import itertools
 import logging
 import sys
-from typing import Any, Dict, Iterator, List, Optional, Type, TypeVar, Union
+from collections.abc import Iterator
+from typing import Any, TypeVar
 
 import httpx2
 import msgspec
@@ -77,7 +78,7 @@ class DSWSClient:
         self._app_id = config.app_id
         self._data_source = config.data_source
         self._debug = config.debug
-        self._token: Optional[Token] = None
+        self._token: Token | None = None
 
     @property
     def token(self) -> str:
@@ -88,10 +89,10 @@ class DSWSClient:
 
     def fetch_snapshot_data(
         self,
-        identifiers: List[str],
-        fields: List[str],
-        start: Optional[DateType] = None,
-        tag: Optional[str] = None,
+        identifiers: list[str],
+        fields: list[str],
+        start: DateType | None = None,
+        tag: str | None = None,
         *,
         concurrent_requests: bool = False,
     ) -> ParsedResponse:
@@ -107,10 +108,10 @@ class DSWSClient:
 
     def fetch_snapshot_data_iter(
         self,
-        identifiers: List[str],
-        fields: List[str],
-        start: Optional[DateType] = None,
-        tag: Optional[str] = None,
+        identifiers: list[str],
+        fields: list[str],
+        start: DateType | None = None,
+        tag: str | None = None,
         *,
         concurrent_requests: bool = False,
     ) -> Iterator[ParsedResponse]:
@@ -132,14 +133,14 @@ class DSWSClient:
         )
         return responses_to_records(data_responses)
 
-    def fetch_timeseries_data(  # noqa: PLR0913
+    def fetch_timeseries_data(  # noqa: PLR0913, PLR0917
         self,
-        identifiers: List[str],
-        fields: List[str],
-        start: Optional[DateType] = None,
-        end: Optional[DateType] = None,
+        identifiers: list[str],
+        fields: list[str],
+        start: DateType | None = None,
+        end: DateType | None = None,
         frequency: str = "D",
-        tag: Optional[str] = None,
+        tag: str | None = None,
         *,
         concurrent_requests: bool = False,
     ) -> ParsedResponse:
@@ -155,14 +156,14 @@ class DSWSClient:
         )
         return aggregate_responses(data_responses)
 
-    def fetch_timeseries_data_iter(  # noqa: PLR0913
+    def fetch_timeseries_data_iter(  # noqa: PLR0913, PLR0917
         self,
-        identifiers: List[str],
-        fields: List[str],
-        start: Optional[DateType] = None,
-        end: Optional[DateType] = None,
+        identifiers: list[str],
+        fields: list[str],
+        start: DateType | None = None,
+        end: DateType | None = None,
         frequency: str = "D",
-        tag: Optional[str] = None,
+        tag: str | None = None,
         *,
         concurrent_requests: bool = False,
     ) -> Iterator[ParsedResponse]:
@@ -213,7 +214,7 @@ class DSWSClient:
 
     def fetch_bundle(
         self,
-        data_requests: List[DSDataRequest],
+        data_requests: list[DSDataRequest],
         **kwargs: object,
     ) -> DSGetDataBundleResponse:
         """
@@ -240,7 +241,7 @@ class DSWSClient:
 
     def fetch_all(
         self,
-        request_bundles: List[List[DSDataRequest]],
+        request_bundles: list[list[DSDataRequest]],
         *,
         threaded: bool = False,
     ) -> Iterator[DSGetDataBundleResponse]:
@@ -253,7 +254,7 @@ class DSWSClient:
 
     def fetch_all_threaded(
         self,
-        request_bundles: List[List[DSDataRequest]],
+        request_bundles: list[list[DSDataRequest]],
     ) -> Iterator[DSGetDataBundleResponse]:
         """Fetch as many bundles as needed to get all items (concurrently)."""
         with concurrent.futures.ThreadPoolExecutor(
@@ -288,20 +289,20 @@ class DSWSClient:
         )
         return token_response.to_token()
 
-    def construct_request(  # noqa: PLR0913
+    def construct_request(  # noqa: PLR0913, PLR0917
         self,
-        identifiers: Union[str, List[str]],
-        fields: List[str],
-        start: Optional[DateType],
-        end: Optional[DateType],
-        frequency: Optional[str],
+        identifiers: str | list[str],
+        fields: list[str],
+        start: DateType | None,
+        end: DateType | None,
+        frequency: str | None,
         kind: int,
-        tag: Optional[str] = None,
+        tag: str | None = None,
         *,
         return_symbol_names: bool = False,
         return_field_names: bool = False,
-        instrument_props: Optional[Dict[str, str]] = None,
-        field_props: Optional[Dict[str, str]] = None,
+        instrument_props: dict[str, str] | None = None,
+        field_props: dict[str, str] | None = None,
     ) -> DSDataRequest:
         """Construct a data request."""
         instrument = DSInstrument.construct(
@@ -320,21 +321,21 @@ class DSWSClient:
         date = DSDate.construct(start, end, frequency, kind)
         return DSDataRequest(instrument, data_types, date, tag)
 
-    def construct_request_bundles(  # noqa: PLR0913
+    def construct_request_bundles(  # noqa: PLR0913, PLR0917
         self,
-        identifiers: List[str],
-        fields: List[str],
-        start: Optional[DateType],
-        end: Optional[DateType],
-        frequency: Optional[str],
+        identifiers: list[str],
+        fields: list[str],
+        start: DateType | None,
+        end: DateType | None,
+        frequency: str | None,
         kind: int,
-        tag: Optional[str] = None,
+        tag: str | None = None,
         *,
         return_symbol_names: bool = False,
         return_field_names: bool = False,
-        instrument_props: Optional[Dict[str, str]] = None,
-        field_props: Optional[Dict[str, str]] = None,
-    ) -> List[List[DSDataRequest]]:
+        instrument_props: dict[str, str] | None = None,
+        field_props: dict[str, str] | None = None,
+    ) -> list[list[DSDataRequest]]:
         """Construct a list of data request bundles."""
         instrument = DSInstrument.construct(
             identifiers,
@@ -364,7 +365,7 @@ class DSWSClient:
     def _execute_request(
         self,
         request: DSRequest,
-        response_cls: Type[ResponseCls],
+        response_cls: type[ResponseCls],
     ) -> ResponseCls:
         """Execute a request."""
         logger.debug("executing request")

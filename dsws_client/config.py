@@ -1,6 +1,6 @@
 import os
 import urllib.parse
-from typing import Any, ClassVar, Optional
+from typing import Any, ClassVar
 
 import attrs
 from dotenv import load_dotenv
@@ -15,10 +15,10 @@ class DSWSConfig:
     path: ClassVar[str] = "/DSWSClient/V1/DSService.svc/rest/"
     host: str = "https://product.datastream.com"
     timeout: int = attrs.field(default=180, converter=int)
-    proxy: Optional[str] = None
-    ssl_cert: Optional[str] = None
+    proxy: str | None = None
+    ssl_cert: str | None = None
     app_id: str = f"dsws-client-{__version__}"
-    data_source: Optional[str] = None
+    data_source: str | None = None
     max_concurrency: int = 1
     debug: bool = attrs.field(default=False, converter=attrs.converters.to_bool)
 

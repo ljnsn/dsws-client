@@ -1,7 +1,8 @@
 import collections
 import datetime as dt
 import logging
-from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, Union
+from collections.abc import Iterable, Iterator
+from typing import Any
 
 import msgspec
 
@@ -15,7 +16,7 @@ from dsws_client.exceptions import InvalidResponseError
 
 logger = logging.getLogger(__name__)
 
-RecordDict = Dict[Tuple[str, dt.datetime], Dict[str, Any]]
+RecordDict = dict[tuple[str, dt.datetime], dict[str, Any]]
 
 
 class Error(msgspec.Struct):
@@ -29,11 +30,11 @@ class Error(msgspec.Struct):
 class Meta(msgspec.Struct):
     """Meta object."""
 
-    data_type_names: Dict[str, str] = msgspec.field(default_factory=dict)
-    symbol_names: Dict[str, str] = msgspec.field(default_factory=dict)
-    additional_responses: Dict[str, str] = msgspec.field(default_factory=dict)
-    tags: List[str] = msgspec.field(default_factory=list)
-    currencies: Dict[str, Dict[str, Optional[str]]] = msgspec.field(
+    data_type_names: dict[str, str] = msgspec.field(default_factory=dict)
+    symbol_names: dict[str, str] = msgspec.field(default_factory=dict)
+    additional_responses: dict[str, str] = msgspec.field(default_factory=dict)
+    tags: list[str] = msgspec.field(default_factory=list)
+    currencies: dict[str, dict[str, str | None]] = msgspec.field(
         default_factory=lambda: collections.defaultdict(dict)
     )
 
@@ -54,8 +55,8 @@ class Meta(msgspec.Struct):
 class ParsedResponse(msgspec.Struct):
     """Parsed response object."""
 
-    records: List[Dict[str, Any]] = msgspec.field(default_factory=list)
-    errors: List[Error] = msgspec.field(default_factory=list)
+    records: list[dict[str, Any]] = msgspec.field(default_factory=list)
+    errors: list[Error] = msgspec.field(default_factory=list)
     meta: Meta = msgspec.field(default_factory=Meta)
 
 
@@ -98,7 +99,7 @@ def parse_response(
         )
     meta = parse_meta(response)
     records: RecordDict = collections.defaultdict(dict)
-    errors: List[Error] = []
+    errors: list[Error] = []
     for data_type_value in response.data_type_values:
         field = data_type_value.data_type
         for symbol_value in data_type_value.symbol_values:
@@ -121,9 +122,9 @@ def parse_response(
 
 def process_symbol_value(  # noqa: PLR0913
     records: RecordDict,
-    errors: List[Error],
+    errors: list[Error],
     field: str,
-    dates: List[dt.datetime],
+    dates: list[dt.datetime],
     symbol_value: DSSymbolResponseValue,
     *,
     process_strings: bool,
@@ -140,7 +141,7 @@ def process_symbol_value(  # noqa: PLR0913
             raise InvalidResponseError(
                 "Number of values does not match number of dates."
             )
-        for date, xvalue in zip(dates, value):
+        for date, xvalue in zip(dates, value, strict=True):
             records[(symbol_value.symbol, date)][field] = xvalue
     else:
         if len(dates) > 1 and not is_error:
@@ -171,7 +172,7 @@ def parse_meta(response: DSDataResponse) -> Meta:
     return meta
 
 
-def process_string_value(value: str) -> Optional[Union[str, bool]]:
+def process_string_value(value: str) -> str | bool | None:
     """Process a string value further."""
     return {
         "NA": None,
