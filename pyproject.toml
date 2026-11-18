@@ -12,7 +12,7 @@ description = "Python client for the Datastream Web Service API (DSWS)"
 readme = "README.md"
 authors = [{ name = "ljnsn", email = "info@ljnsn.com" }]
 license = "MIT"
-requires-python = ">=3.8,<4.0"
+requires-python = ">=3.10,<4.0"
 dependencies = [
   "attrs>=23.1.0",
   "httpx>=0.27.0",
