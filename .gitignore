@@ -164,5 +164,6 @@ workspaces/*/*.lock
 Datastream/
 scratch*
 
-# mise
-mise.local.toml
+# local configs
+*.local.toml
+*.local.lock
